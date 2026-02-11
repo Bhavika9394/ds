@@ -1,3 +1,4 @@
+ ImplementationofFuzzyLogicOperations.
 import numpy as np
 
 def fuzzy_union_or(A, B, operator='max'):
@@ -160,6 +161,8 @@ tipping_simulation.compute()
 print(f"Recommended Tip: {tipping_simulation.output['tip']:.2f}%")
 
 
+
+
 // DefuzzificationTechniques.
 import numpy as np
 import skfuzzy as fuzz
@@ -236,6 +239,8 @@ aggregated_mf = np.fmax(mf_1 * 0.7, mf_2 * 1.0) # Assume mf_1 was scaled down by
 
 # Run the demonstration
 demonstrate_defuzzification(X, aggregated_mf)
+
+
 
 
 //ImplementationofSingle-LayerPerceptron
@@ -361,6 +366,8 @@ plt.xlabel('Epoch')
 plt.ylabel('Total Misclassifications')
 plt.grid(True)
 plt.show()
+
+
 
 
 // MultilayerPerceptronusingBackpropagationAlgorithm
@@ -526,6 +533,8 @@ plt.grid(True)
 plt.show()
 
 
+
+
 #Implementation of Simple Neural Network (McCulloh Pitts model)
 import numpy as np
 
@@ -614,6 +623,7 @@ def implement_not_gate():
 
 implement_or_gate()
 implement_not_gate()
+
 
 
 // ImplementationofGeneticAlgorithm(GA).
@@ -761,6 +771,8 @@ plt.title("GA for TSP")
 plt.show()
 
 
+
+
 # Adaptive Neuro-Fuzzy Inference System (ANFIS)
 # Single Complete Python Program
 # ---------------------------------------------
@@ -874,4 +886,5 @@ plt.ylabel("Error")
 plt.title("ANFIS Training Error")
 plt.grid()
 plt.show()
+
 
