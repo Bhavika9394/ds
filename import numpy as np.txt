@@ -1,4 +1,4 @@
- ImplementationofFuzzyLogicOperations.
+ 1....//ImplementationofFuzzyLogicOperations//
 import numpy as np
 
 def fuzzy_union_or(A, B, operator='max'):
@@ -71,7 +71,7 @@ print(f"Result (NOT B): {NOT_B}")
 
 
 
-// DesignofFuzzyInferenceSystem(FIS)
+2....// DesignofFuzzyInferenceSystem(FIS)//
 import numpy as np
 import skfuzzy as fuzz
 from skfuzzy import control as ctrl
@@ -161,9 +161,7 @@ tipping_simulation.compute()
 print(f"Recommended Tip: {tipping_simulation.output['tip']:.2f}%")
 
 
-
-
-// DefuzzificationTechniques.
+3...// DefuzzificationTechniques.//
 import numpy as np
 import skfuzzy as fuzz
 import matplotlib.pyplot as plt
@@ -241,9 +239,7 @@ aggregated_mf = np.fmax(mf_1 * 0.7, mf_2 * 1.0) # Assume mf_1 was scaled down by
 demonstrate_defuzzification(X, aggregated_mf)
 
 
-
-
-//ImplementationofSingle-LayerPerceptron
+4....//ImplementationofSingle-LayerPerceptron
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -370,7 +366,7 @@ plt.show()
 
 
 
-// MultilayerPerceptronusingBackpropagationAlgorithm
+5....// MultilayerPerceptronusingBackpropagationAlgorithm//
 import numpy as np
 
 # --- 1. Define Activation and Derivative Functions (Sigmoid) ---
@@ -535,7 +531,7 @@ plt.show()
 
 
 
-#Implementation of Simple Neural Network (McCulloh Pitts model)
+6...#Implementation of Simple Neural Network (McCulloh Pitts model)
 import numpy as np
 
 # --- 1. Activation Function (Threshold Logic) ---
@@ -626,7 +622,8 @@ implement_not_gate()
 
 
 
-// ImplementationofGeneticAlgorithm(GA).
+
+7....// ImplementationofGeneticAlgorithm(GA).
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -687,7 +684,7 @@ plt.show()
 
 
 
-//SolvingTravellingSalesmanProblemusingGA
+8....//  SolvingTravellingSalesmanProblemusingGA.
 import numpy as np
 import random
 import matplotlib.pyplot as plt
@@ -773,9 +770,8 @@ plt.show()
 
 
 
-# Adaptive Neuro-Fuzzy Inference System (ANFIS)
-# Single Complete Python Program
-# ---------------------------------------------
+
+9..// DesignofAdaptiveNeuro-FuzzyInferenceSystem(ANFIS)
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -886,5 +882,4 @@ plt.ylabel("Error")
 plt.title("ANFIS Training Error")
 plt.grid()
 plt.show()
-
 
