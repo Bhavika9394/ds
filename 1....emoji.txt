@@ -1,0 +1,437 @@
+1....emoji
+
+import 'dart:math'; 
+import 'package:flutter/material.dart'; 
+ 
+void main() { 
+  runApp(const EmojiApp()); 
+} 
+ 
+class EmojiApp extends StatelessWidget { 
+  const EmojiApp({super.key}); 
+ 
+  @override 
+  Widget build(BuildContext context) { 
+    return MaterialApp( 
+      debugShowCheckedModeBanner: false, 
+      title: 'Emoji App', 
+      home: const EmojiHome(), 
+    ); 
+  } 
+} 
+ 
+class EmojiHome extends StatefulWidget { 
+  const EmojiHome({super.key}); 
+ 
+  @override 
+  State<EmojiHome> createState() => _EmojiHomeState(); 
+} 
+ 
+class _EmojiHomeState extends State<EmojiHome> { 
+  final List<String> emojis = [ 
+    '     ', '       ', '     ', '    ', '          ', '      ', '      ', '    ', '     ' 
+  ]; 
+ 
+  String currentEmoji = '     '; 
+  final Random random = Random(); 
+ 
+  void changeEmoji() { 
+    setState(() { 
+      currentEmoji = emojis[random.nextInt(emojis.length)]; 
+    }); 
+  } 
+ 
+  @override 
+  Widget build(BuildContext context) { 
+    return Scaffold( 
+      appBar: AppBar( 
+        title: const Text('Hello Emoji App'), 
+        centerTitle: true, 
+      ), 
+      body: Center( 
+        child: Column( 
+          mainAxisAlignment: MainAxisAlignment.center, 
+          children: [ 
+            Text( 
+              currentEmoji, 
+              style: const TextStyle(fontSize: 120), 
+            ), 
+            const SizedBox(height: 30), 
+            ElevatedButton( 
+              onPressed: changeEmoji, 
+              child: const Text( 
+                'Tap Me', 
+                style: TextStyle(fontSize: 18), 
+              ), 
+            ), 
+          ], 
+        ), 
+      ), 
+    ); 
+  } 
+}
+
+
+
+--2--Simple Login
+import 'package:flutter/material.dart'; 
+ 
+void main() { 
+  runApp(const LoginApp()); 
+} 
+ 
+class LoginApp extends StatelessWidget { 
+  const LoginApp({super.key}); 
+ 
+  @override 
+  Widget build(BuildContext context) { 
+    return MaterialApp( 
+      debugShowCheckedModeBanner: false, 
+      title: 'Login Screen', 
+      home: const LoginScreen(), 
+  ); 
+  } 
+} 
+ 
+class LoginScreen extends StatefulWidget { 
+  const LoginScreen({super.key}); 
+ 
+  @override 
+  State<LoginScreen> createState() => _LoginScreenState(); 
+} 
+ 
+class _LoginScreenState extends State<LoginScreen> { 
+  final TextEditingController usernameController = TextEditingController(); 
+  final TextEditingController passwordController = TextEditingController(); 
+ 
+  void login() { 
+    if (usernameController.text.isNotEmpty && 
+        passwordController.text.isNotEmpty) { 
+      ScaffoldMessenger.of(context).showSnackBar( 
+        const SnackBar( 
+          content: Text('Welcome!'), 
+          backgroundColor: Colors.green, 
+        ), 
+      ); 
+    } else { 
+      ScaffoldMessenger.of(context).showSnackBar( 
+        const SnackBar( 
+          content: Text('Please enter all fields'), 
+          backgroundColor: Colors.red, 
+        ), 
+      ); 
+    } 
+  } 
+ 
+  @override 
+  Widget build(BuildContext context) { 
+    return Scaffold( 
+      appBar: AppBar( 
+        title: const Text('Login Screen'), 
+        centerTitle: true, 
+      ), 
+      body: Padding( 
+        padding: const EdgeInsets.all(20), 
+        child: Column( 
+          mainAxisAlignment: MainAxisAlignment.center, 
+     children: [ 
+            TextField( 
+              controller: usernameController, 
+              decoration: const InputDecoration( 
+                labelText: 'Username', 
+                border: OutlineInputBorder(), 
+              ), 
+            ), 
+            const SizedBox(height: 20), 
+            TextField( 
+              controller: passwordController, 
+              obscureText: true, 
+              decoration: const InputDecoration( 
+                labelText: 'Password', 
+                border: OutlineInputBorder(), 
+              ), 
+            ), 
+            const SizedBox(height: 30), 
+            ElevatedButton( 
+              onPressed: login, 
+              child: const Text('Login'), 
+            ), 
+          ], 
+        ), 
+      ), 
+    ); 
+  } 
+}
+
+
+
+-3--Email Vaidation
+import 'package:flutter/material.dart'; 
+import 'package:fluttertoast/fluttertoast.dart'; 
+ 
+void main() { 
+  runApp(const SmartLoginApp()); 
+} 
+ 
+class SmartLoginApp extends StatelessWidget { 
+  const SmartLoginApp({super.key}); 
+  @override 
+  Widget build(BuildContext context) { 
+    return const MaterialApp( 
+      debugShowCheckedModeBanner: false, 
+      home: LoginForm(), 
+    ); 
+  } 
+} 
+ 
+class LoginForm extends StatefulWidget { 
+  const LoginForm({super.key}); 
+ 
+  @override 
+  State<LoginForm> createState() => _LoginFormState(); 
+} 
+ 
+class _LoginFormState extends State<LoginForm> { 
+  final TextEditingController emailController = TextEditingController(); 
+  final TextEditingController passwordController = TextEditingController(); 
+ 
+  bool isButtonEnabled = false; 
+ 
+  void validateForm() { 
+    setState(() { 
+      isButtonEnabled = 
+          emailController.text.contains('@') && 
+          passwordController.text.length >= 6; 
+    }); 
+  } 
+ 
+  void showToast() { 
+    Fluttertoast.showToast( 
+      msg: "Great! You typed a real email!     ", 
+      toastLength: Toast.LENGTH_SHORT, 
+      gravity: ToastGravity.BOTTOM, 
+      backgroundColor: Colors.green, 
+      textColor: Colors.white, 
+      fontSize: 16, 
+    ); 
+  } 
+ 
+  @override 
+  Widget build(BuildContext context) { 
+    return Scaffold(
+  appBar: AppBar( 
+        title: const Text("Smart Login Form"), 
+        centerTitle: true, 
+      ), 
+      body: Padding( 
+        padding: const EdgeInsets.all(20), 
+        child: Column( 
+          mainAxisAlignment: MainAxisAlignment.center, 
+          children: [ 
+            TextField( 
+              controller: emailController, 
+              onChanged: (_) => validateForm(), 
+              decoration: const InputDecoration( 
+                labelText: 'Email', 
+                border: OutlineInputBorder(), 
+              ), 
+            ), 
+            const SizedBox(height: 20), 
+            TextField( 
+              controller: passwordController, 
+              onChanged: (_) => validateForm(), 
+              obscureText: true, 
+              decoration: const InputDecoration( 
+                labelText: 'Password', 
+                border: OutlineInputBorder(), 
+              ), 
+            ), 
+            const SizedBox(height: 30), 
+            ElevatedButton( 
+              onPressed: isButtonEnabled ? showToast : null, 
+              child: const Text("Login"), 
+            ), 
+          ], 
+        ), 
+      ), 
+    ); 
+  } 
+}
+
+
+
+--4 Theme ColorChanger
+import 'package:flutter/material.dart'; 
+ 
+void main() { 
+  runApp(const ThemeChangerApp()); 
+} 
+class ThemeChangerApp extends StatelessWidget { 
+  const ThemeChangerApp({super.key}); 
+ 
+  @override 
+  Widget build(BuildContext context) { 
+    return const MaterialApp( 
+      debugShowCheckedModeBanner: false, 
+      home: ThemeChangerScreen(), 
+    ); 
+  } 
+} 
+ 
+class ThemeChangerScreen extends StatefulWidget { 
+  const ThemeChangerScreen({super.key}); 
+ 
+  @override 
+  State<ThemeChangerScreen> createState() => _ThemeChangerScreenState(); 
+} 
+ 
+class _ThemeChangerScreenState extends State<ThemeChangerScreen> { 
+  Color backgroundColor = Colors.white; 
+ 
+  void changeColor(Color color) { 
+    setState(() { 
+      backgroundColor = color; 
+    }); 
+  } 
+ 
+  @override 
+  Widget build(BuildContext context) { 
+    return Scaffold( 
+      backgroundColor: backgroundColor, 
+      appBar: AppBar( 
+        title: const Text("Theme Color Changer"), 
+        centerTitle: true, 
+      ), 
+      body: Center( 
+        child: Row( 
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly, 
+          children: [ 
+            ElevatedButton( 
+              style: ElevatedButton.styleFrom( 
+                backgroundColor: Colors.blue, 
+              ), 
+              onPressed: () => changeColor(Colors.blue.shade100), 
+              child: const Text("Blue"), 
+            ),
+  ElevatedButton( 
+              style: ElevatedButton.styleFrom( 
+                backgroundColor: Colors.orange, 
+              ), 
+              onPressed: () => changeColor(Colors.orange.shade100), 
+              child: const Text("Orange"), 
+            ), 
+            ElevatedButton( 
+              style: ElevatedButton.styleFrom( 
+                backgroundColor: Colors.green, 
+              ), 
+              onPressed: () => changeColor(Colors.green.shade100), 
+              child: const Text("Green"), 
+            ), 
+          ], 
+        ), 
+      ), 
+    ); 
+  } 
+} 
+
+
+--5 Counter with auto Increment
+import 'dart:async'; 
+import 'package:flutter/material.dart'; 
+ 
+void main() { 
+  runApp(const CounterApp()); 
+} 
+ 
+class CounterApp extends StatelessWidget { 
+  const CounterApp({super.key}); 
+ 
+  @override 
+  Widget build(BuildContext context) { 
+    return const MaterialApp( 
+      debugShowCheckedModeBanner: false, 
+      home: CounterScreen(), 
+    ); 
+  } 
+} 
+ 
+class CounterScreen extends StatefulWidget {
+  const CounterScreen({super.key}); 
+ 
+  @override 
+  State<CounterScreen> createState() => _CounterScreenState(); 
+} 
+ 
+class _CounterScreenState extends State<CounterScreen> { 
+  int counter = 0; 
+  Timer? timer; 
+ 
+  void startCounter() { 
+    timer ??= Timer.periodic( 
+      const Duration(seconds: 1), 
+      (Timer t) { 
+        setState(() { 
+          counter++; 
+        }); 
+      }, 
+    ); 
+  } 
+ 
+  void pauseCounter() { 
+    timer?.cancel(); 
+    timer = null; 
+  } 
+ 
+  void resetCounter() { 
+    pauseCounter(); 
+    setState(() { 
+      counter = 0; 
+    }); 
+  } 
+ 
+  @override 
+  void dispose() { 
+    timer?.cancel(); 
+    super.dispose(); 
+  } 
+ 
+  @override 
+  Widget build(BuildContext context) { 
+    return Scaffold( 
+      appBar: AppBar( 
+        title: const Text("Auto Increment Counter"), 
+        centerTitle: true, 
+      ), 
+      body: Column( 
+        mainAxisAlignment: MainAxisAlignment.center, 
+        children: [
+    Text( 
+            counter.toString(), 
+            style: const TextStyle( 
+              fontSize: 80, 
+              fontWeight: FontWeight.bold, 
+            ), 
+          ), 
+          const SizedBox(height: 40), 
+          Row( 
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly, 
+            children: [ 
+              ElevatedButton( 
+                onPressed: startCounter, 
+                child: const Text("Start"), 
+              ), 
+              ElevatedButton( 
+                onPressed: pauseCounter, 
+                child: const Text("Pause"), 
+              ), 
+              ElevatedButton( 
+                onPressed: resetCounter, 
+                child: const Text("Reset"), 
+              ), 
+            ], 
+          ), 
+        ], 
+      ), 
+    ); 
+  } 
+}
