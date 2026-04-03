@@ -29,10 +29,10 @@ class EmojiHome extends StatefulWidget {
  
 class _EmojiHomeState extends State<EmojiHome> { 
   final List<String> emojis = [ 
-    '     ', '       ', '     ', '    ', '          ', '      ', '      ', '    ', '     ' 
+    '😁', '😊', '🤔', '💕', '👍', '👌', '⏰', '😂', '😍' 
   ]; 
  
-  String currentEmoji = '     '; 
+  String currentEmoji = '😁'; 
   final Random random = Random(); 
  
   void changeEmoji() { 
@@ -593,7 +593,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
  
     await notificationsPlugin.show( 
       0, 
-      'Reminder '⏰', 
+      'Reminder⏰', 
   message, 
       notificationDetails, 
     ); 
@@ -871,6 +871,10 @@ void main() {
   runApp(const CardApp()); 
 } 
  
+void main() { 
+  runApp(const CardApp()); 
+} 
+ 
 class CardApp extends StatelessWidget { 
   const CardApp({super.key}); 
  
@@ -912,8 +916,8 @@ class _InputScreenState extends State<InputScreen> {
         title: const Text('Dynamic Cards Generator'), 
         backgroundColor: Colors.blue, 
       ), 
-      body: Padding( 
- padding: const EdgeInsets.all(16), 
+      body: Padding(
+padding: const EdgeInsets.all(16), 
         child: Column( 
           children: [ 
             TextField( 
@@ -958,8 +962,7 @@ class CardsScreen extends StatelessWidget {
       appBar: AppBar( 
         title: const Text('Generated Cards'), 
         backgroundColor: Colors.green, 
-      ), 
- body: ListView.builder( 
+      ),    body: ListView.builder( 
         itemCount: cardCount, 
         itemBuilder: (context, index) { 
           return Card( 
@@ -981,7 +984,6 @@ class CardsScreen extends StatelessWidget {
     ); 
   } 
 } 
-
 
 
 --11 Fake Dialer
@@ -1022,7 +1024,7 @@ class _DialerScreenState extends State<DialerScreen> {
       context: context, 
       builder: (context) => AlertDialog( 
         title: const Text('Calling'), 
-        content: Text('    Calling $number...'), 
+        content: Text('📞Calling $number...'), 
         actions: [ 
           TextButton( 
             onPressed: () => Navigator.pop(context), 
