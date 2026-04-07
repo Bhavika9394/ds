@@ -1,3 +1,72 @@
+#_4 Read csv,excel,web
+import numpy as np
+import pandas as pd
+df_csv=pd.read_csv('iris.csv')
+df_csv.head()
+#web
+url="https://raw.githubusercontent.com/xingcheng003/iris.csv/master/iris.csv"
+df_web=pd.read_csv(url)
+df_web.head()
+#dataset information for df_web
+print('Shape of df_web:')
+display(df_web.shape)
+
+#Numeric summary for df_web
+print('\nNumeric Summary of df_web:')
+display(df_web.describe())
+
+
+#mean, mode, median for df_web
+print('\nMean of df_web:')
+display(df_web.mean(numeric_only=True))
+print('\nMedian of df_web:')
+display(df_web.median(numeric_only=True))
+print('\nMode of df_web:')
+display(df_web.mode())
+
+#Std deviation and Variance for df_web
+print('\nStandard Deviation of df_web:')
+display(df_web.std(numeric_only=True))
+print('\nVariance of df_web:')
+display(df_web.var(numeric_only=True))
+
+
+#Skewness and Kurtosis for df_web
+print('\nSkewness of df_web:')
+display(df_web.skew(numeric_only=True))
+print('\nKurtosis of df_web:')
+display(df_web.kurtosis(numeric_only=True))
+
+#Frequency count for df_web
+print('\nFrequency Count for species:')
+df_csv['species'].value_counts()
+
+#Group-wise Descriptive Analytics for df_web
+print('\nGroup-wise Mean by species:')
+display(df_csv.groupby('species').mean())
+print('\nGroup-wise Median by species:')
+display(df_csv.groupby('species').median())
+print('\nGroup-wise Standard Deviation by species:')
+display(df_csv.groupby('species').std())
+print('\nGroup-wise Variance by species:')
+display(df_csv.groupby('species').var())
+
+#Correlation Analysis for df_web
+print('\nCorrelation Matrix of df_web:')
+display(df_csv.corr(numeric_only=True))
+
+#dectect missing values for df_web
+print('\nMissing values in df_web:')
+display(df_web.isnull().sum())
+
+#sample data selction for df_web
+print('\nSample data selection for sepal_length and petal_length:')
+display(df_csv[['sepal_length', 'petal_length']].head())
+
+
+
+
+
 #_5 pima and uci
 import pandas as pd
 import numpy as np
@@ -164,6 +233,8 @@ plt.show()
 
 
 
+
+
 #__6 Uci graphs
 import pandas as pd
 import numpy as np
@@ -228,6 +299,8 @@ ax.set_ylabel('bp')
 ax.set_zlabel('target')
 plt.title("3D Scatter Plot")
 plt.show()
+
+
 
 
 
@@ -328,6 +401,8 @@ if "Price" in df.columns:
     print("MAE:", mean_absolute_error(y_test, y_pred))
 else:
     print("Error: 'Price' column not found")
+
+
 
 
 
