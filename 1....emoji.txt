@@ -328,6 +328,11 @@ if "Price" in df.columns:
     print("MAE:", mean_absolute_error(y_test, y_pred))
 else:
     print("Error: 'Price' column not found")
+
+
+
+
+#_8 credict and application
 import numpy as np
 import pandas as pd
 import seaborn as sns
