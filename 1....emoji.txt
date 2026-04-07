@@ -328,3 +328,151 @@ if "Price" in df.columns:
     print("MAE:", mean_absolute_error(y_test, y_pred))
 else:
     print("Error: 'Price' column not found")
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+credit_record_df = pd.read_csv('credit_record.csv')
+credit_record_df.head(20)
+application_record_df = pd.read_csv('application_record.csv')
+application_record_df.head()
+print(f'Credit data have {credit_record_df.shape[0]} rows , {credit_record_df.shape[1]} columns.')
+print(f'Application data have {application_record_df.shape[0]} rows , {application_record_df.shape[1]} columns.')
+print('Credit data null values:')
+print(credit_record_df.isnull().sum())
+print('Application data null values:')
+print(application_record_df.isnull().sum())
+credit_record_df['STATUS'].unique()
+#Relationship between Columns
+sns.countplot(x='STATUS', data=credit_record_df)
+plt.show()
+plt.figure(figsize=(15, 6))
+sns.countplot(x='MONTHS_BALANCE', data=credit_record_df)
+plt.show()
+credit_record_df.MONTHS_BALANCE.nunique()
+credit_record_df.MONTHS_BALANCE.min()
+credit_record_df.info()
+credit_record_df['MONTHS_BALANCE'].groupby(credit_record_df['STATUS']).agg(pd.Series.mode)
+plt.figure(figsize=(10, 6))
+sns.histplot(credit_record_df['MONTHS_BALANCE'], bins=30, kde=True)
+plt.title('Distribution of MONTHS_BALANCE')
+plt.xlabel('Months Balance')
+plt.ylabel('Frequency')
+plt.show()
+figsize = (10, 6)
+plt.figure(figsize=figsize)
+sns.countplot(x='NAME_INCOME_TYPE', data=application_record_df)
+plt.show()
+credit_record_df['Good or Bad'] = ['Good' if x in set(['0','X','C']) else 'Bad' for x in credit_record_df['STATUS']]
+credit_record_df
+credit_goods_bads = credit_record_df.groupby(['ID','Good or Bad']).size().to_frame('size')
+credit_goods_bads.reset_index(inplace=True)
+credit_goods_bads
+idx = credit_goods_bads.groupby('ID')['size'].idxmax()
+max_goods_bads = credit_goods_bads.loc[idx]
+max_goods_bads
+max_goods_bads['Label'] = [1 if x == 'Good' else 0 for x in max_goods_bads['Good or Bad']]
+max_goods_bads
+max_goods_bads = max_goods_bads.drop(['Good or Bad', 'size'], axis=1)
+max_goods_bads = max_goods_bads.reset_index(drop=True)
+max_goods_bads
+#Time to join data
+application_record_df.fillna('Unknown', inplace=True)
+len(set(application_record_df['ID']).intersection(set(max_goods_bads['ID'])))
+data = pd.merge(application_record_df, max_goods_bads, how='inner', on='ID')
+data
+#Preprocessing
+X = data.drop('Label', axis=1)
+y = data['Label']
+X
+X.info()
+X_info = X.copy()
+
+# Label encoding for categoricals
+for colname in X_info.select_dtypes("object"):
+    X_info[colname], _ = X_info[colname].factorize()
+
+# Converting floats to ints
+for colname in X_info.select_dtypes("float"):
+    X_info[colname] = X_info[colname].astype(int)
+
+# Converting bools to ints
+#for colname in X_info.select_dtypes("bool"):
+#    X_info[colname] = X_info[colname].astype(int)
+
+# All discrete features should now have integer dtypes
+discrete_features = X_info.dtypes != int
+
+from sklearn.feature_selection import mutual_info_regression
+
+def make_mi_scores(X, y, discrete_features):
+    mi_scores = mutual_info_regression(X, y, discrete_features=discrete_features)
+    mi_scores = pd.Series(mi_scores, name="MI Scores", index=X.columns)
+    mi_scores = mi_scores.sort_values(ascending=False)
+    return mi_scores
+
+mi_scores = make_mi_scores(X_info, y, discrete_features)
+mi_scores
+def plot_mi_scores(scores):
+    scores = scores.sort_values(ascending=True)
+    width = np.arange(len(scores))
+    ticks = list(scores.index)
+    plt.barh(width, scores)
+    plt.yticks(width, ticks)
+    plt.title("Mutual Information Scores")
+
+
+plt.figure(dpi=100, figsize=(10, 15))
+plot_mi_scores(mi_scores)
+sns.relplot(x="AMT_INCOME_TOTAL", y="Label", data=data);
+sns.lmplot(x="DAYS_EMPLOYED", y="Label", hue="CNT_CHILDREN", data=data);
+#sns.lmplot(x="CODE_GENDER", y=y, hue="FLAG_OWN_REALTY", data=X_info);
+plt.figure(dpi=50, figsize=(35, 10))
+sns.scatterplot(x=data['OCCUPATION_TYPE'], y=data['Label'], hue=data['CODE_GENDER'])
+#Convert Categorical Data To numerical
+X = pd.get_dummies(X, drop_first=True)
+X
+#Scalling the data
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+from sklearn.preprocessing import StandardScaler
+
+
+scaler = StandardScaler()
+
+X_train_scaled= scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+print("Normalized input data(X):\n", X_train_scaled)
+#modelling
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
+import matplotlib.pyplot as plt
+rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+
+rf_model.fit(X_train, y_train)
+
+rf_pred = rf_model.predict(X_test)
+rf_cm = confusion_matrix(y_test, rf_pred)
+
+print("Random Forest Confusion Matrix")
+print(rf_cm)
+
+ConfusionMatrixDisplay(confusion_matrix=rf_cm).plot()
+plt.title("Random Forest Confusion Matrix")
+plt.show()
+xgb_model = XGBClassifier(use_label_encoder=False, eval_metric='logloss')
+
+xgb_model.fit(X_train, y_train)
+
+xgb_pred = xgb_model.predict(X_test)
+xgb_cm = confusion_matrix(y_test, xgb_pred)
+
+print("XGBoost Confusion Matrix")
+print(xgb_cm)
+
+ConfusionMatrixDisplay(confusion_matrix=xgb_cm).plot()
+plt.title("XGBoost Confusion Matrix")
+plt.show()
