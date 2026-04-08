@@ -1,674 +1,1414 @@
-#2_array
+#_1 Implementation of Fuzzy Logic Operations 
 import numpy as np
-arr = np.array([[1, 2, 3],
-[4, 2, 5]])
-print("Array is of type: ", type(arr))
-print("No. of dimensions: ", arr.ndim)
-print("Shape of array: ", arr.shape)
-print("Size of array: ", arr.size)
-print("Array stores elements of type: ", arr.dtype)
 
-import numpy as np 
-import pandas as pd
-data = np.array([['','Col1','Col2'], ['Row1',1,2], ['Row2',3,4]])
-print(pd.DataFrame(data=data[1:,1:],
-index = data[1:,0], columns=data[0,1:]))
-my_2darray = np.array([[1, 2, 3], [4, 5, 6]]) 
-print(pd.DataFrame(my_2darray))
-my_dict = {1: ['1', '3'], 2: ['1', '2'], 3: ['2', '4']} 
-print(pd.DataFrame(my_dict))
-my_df = pd.DataFrame(data=[4,5,6,7], index=range(0,4), columns=['A']) 
-print(pd.DataFrame(my_df))
-my_series = pd.Series({"United Kingdom":"London", "India":"New Delhi", "United States":"Washington", "Belgium":"Brussels"})
-print(pd.DataFrame(my_series)) 
-df = pd.DataFrame(np.array([[1, 2, 3], [4, 5, 6]])) 
-print(df.shape)
-print(len(df.index))
+def fuzzy_union_or(A, B, operator='max'):
 
+    if len(A) != len(B):
+        raise ValueError("Fuzzy sets must have the same length (same universe of discourse).")
 
+    if operator == 'max':
 
+        return np.maximum(A, B)
 
+    else:
+        raise NotImplementedError(f"Operator '{operator}' not supported for Fuzzy Union.")
+
+def fuzzy_intersection_and(A, B, operator='min'):
+
+    if len(A) != len(B):
+        raise ValueError("Fuzzy sets must have the same length (same universe of discourse).")
+
+    if operator == 'min':
+
+        return np.minimum(A, B)
+
+    else:
+        raise NotImplementedError(f"Operator '{operator}' not supported for Fuzzy Intersection.")
+
+def fuzzy_complement_not(A):
 
 
-#_3 dataframe
-import pandas as pd
+    return 1 - A
 
-# From Dictionary
-data = {
-'ID': [1, 2, 3, 4],
-'Name': ['Alice', 'Bob', 'Charlie', 'David'],
-'Score': [78, 85, 90, 88]
-}
-df = pd.DataFrame(data)
-print(df)
+U = np.array([1, 2, 3, 4, 5])
+print(f"Universe of Discourse (U): {U}\n")
+
+A = np.array([1.0, 0.8, 0.4, 0.1, 0.0])
+B = np.array([0.0, 0.1, 0.3, 0.7, 1.0])
+print("--- Original Sets ---")
+print(f"Fuzzy Set A: {A}")
+print(f"Fuzzy Set B: {B}\n")
+# a. Fuzzy UNION (OR)
+A_OR_B = fuzzy_union_or(A, B)
+print("--- Fuzzy UNION (A OR B) ---")
+print(f"Operation: max(mu_A(x), mu_B(x))")
+# Example: max(A[0], B[0]) = max(1.0, 0.0) = 1.0
+print(f"Result (A OR B): {A_OR_B}\n")
+# b. Fuzzy INTERSECTION (AND)
+A_AND_B = fuzzy_intersection_and(A, B)
+print("--- Fuzzy INTERSECTION (A AND B) ---")
+print(f"Operation: min(mu_A(x), mu_B(x))")
+# Example: min(A[1], B[1]) = min(0.8, 0.1) = 0.1
+print(f"Result (A AND B): {A_AND_B}\n")
+# c. Fuzzy COMPLEMENT (NOT)
+NOT_A = fuzzy_complement_not(A)
+print("--- Fuzzy COMPLEMENT (NOT A) ---")
+print(f"Operation: 1 - mu_A(x)")
+# Example: 1 - A[2] = 1 - 0.4 = 0.6
+print(f"Result (NOT A): {NOT_A}\n")
+NOT_B = fuzzy_complement_not(B)
+print("--- Fuzzy COMPLEMENT (NOT B) ---")
+print(f"Operation: 1 - mu_B(x)")
+print(f"Result (NOT B): {NOT_B}")
 
 
-# From List of Lists
-data2 = [[101, 'Math', 85], [102, 'Science', 90]]
-df2 = pd.DataFrame(data2, columns=['Roll', 'Subject', 'Marks'])
-print(df2)
 
-# Inspecting and Understanding Data print(df.head())
-print(df.tail())
-print(df.shape)
-print(df.info())
-print(df.describe())
 
-# 3. Row and Column Operations # Add column
-df['Bonus'] = 5
-df['Final_Score'] = df['Score'] + df['Bonus']
-# Drop row and column
-df.drop(3, axis=0, inplace=True)
-df.drop('Bonus', axis=1, inplace=True)
-print(df)
-
-#4. Filtering and Conditional Selection
-# Filter data
-high_scores = df[df['Final_Score'] > 85]
-print(high_scores)
-# Multiple conditions
-filtered = df[(df['Final_Score'] > 80) & (df['ID'] > 1)]
-print(filtered)
-
-#5. Sorting and Ranking
-# Sort values
-print(df.sort_values(by='Final_Score', ascending=False))
-# Rank
-df['Rank'] = df['Final_Score'].rank(ascending=False)
-print(df)
-
-#6. Working with Missing Data
+#_2 Design of Fuzzy Inference System (FIS) 
 import numpy as np
-df.loc[1, 'Final_Score'] = np.nan
-print(df.isnull())
-print(df.fillna(df['Final_Score'].mean()))
-print(df.dropna())
+import skfuzzy as fuzz
+from skfuzzy import control as ctrl
+import matplotlib.pyplot as plt
 
-#7. Renaming Columns and Index
-df.rename(columns={'Final_Score': 'Total'}, inplace=True)
-df.index = ['A', 'B', 'C']
-print(df)
+# --- 1. Define the Antecedent (Input) and Consequent (Output) Variables ---
+# New Antecedent/Consequent objects hold universe variables and
+# membership functions
+# The universe (range of possible values) for each variable is defined.
+# Universe for 'service' quality, ranging from 0 to 10
+service = ctrl.Antecedent(np.arange(0, 11, 1), 'service')
+# Universe for 'food' quality, ranging from 0 to 10
+food = ctrl.Antecedent(np.arange(0, 11, 1), 'food')
+# Universe for 'tip' percentage, ranging from 0 to 25%
+tip = ctrl.Consequent(np.arange(0, 26, 1), 'tip')
 
-#8. String Operations
-df['Name_Upper'] = df['Name'].str.upper()
-df['Name_Length'] = df['Name'].str.len()
-print(df)
+# --- 2. Define Fuzzy Membership Functions (Fuzzification) ---
+# We use simple triangular and trapezoidal membership functions (trimf,
+# trapmf)
 
-#9. GroupBy Operations # Grouping example
-data3 = {
-'Dept': ['IT', 'IT', 'HR', 'HR'],
-'Employee': ['A', 'B', 'C', 'D'],
-'Salary': [50000, 60000, 45000, 48000]}
+# Service quality fuzzy sets
+service['poor'] = fuzz.trimf(service.universe, [0, 0, 5])
+service['acceptable'] = fuzz.trimf(service.universe, [0, 5, 10])
+service['excellent'] = fuzz.trimf(service.universe, [5, 10, 10])
 
-emp_df = pd.DataFrame(data3)
-print(emp_df.groupby('Dept')['Salary'].mean())
+# Food quality fuzzy sets
+food['bad'] = fuzz.trapmf(food.universe, [0, 0, 1, 3])
+food['decent'] = fuzz.trimf(food.universe, [1, 5, 9])
+food['great'] = fuzz.trapmf(food.universe, [7, 9, 10, 10])
 
-#10. Applying Functions # Apply function
-df['Grade'] = df['Total'].apply(lambda x: 'A' if x >= 90 else 'B')
-print(df)
+# Tip percentage fuzzy sets
+tip['low'] = fuzz.trimf(tip.universe, [0, 0, 13])
+tip['medium'] = fuzz.trimf(tip.universe, [0, 13, 25])
+tip['high'] = fuzz.trimf(tip.universe, [13, 25, 25])
 
-#11. Exporting Data # Save to CSV
-df.to_csv('output.csv', index=False)
-print("Data exported successfully")
+# Optional: Visualize the membership functions
+# service.view()
+# food.view()
+# tip.view()
+
+# --- 3. Define the Fuzzy Rules (Rule Base) ---
+# Rules are defined in a natural language-like IF-THEN format
+rule1 = ctrl.Rule(service['poor'] | food['bad'], tip['low'])
+rule2 = ctrl.Rule(service['acceptable'], tip['medium'])
+rule3 = ctrl.Rule(service['excellent'] & food['great'], tip['high'])
+rule4 = ctrl.Rule(food['decent'] & service['poor'], tip['medium'])
+
+# --- 4. Create the Control System and Simulation ---
+# The ControlSystem object holds the fuzzy rules
+tip_control = ctrl.ControlSystem([rule1, rule2, rule3, rule4])
+
+# The ControlSystemSimulation object allows us to pass inputs and get
+# outputs
+tipping_simulation = ctrl.ControlSystemSimulation(tip_control)
+
+# --- 5. Fuzzify, Infer, Aggregate, and Defuzzify (The Process) ---
+# Pass the input values to the simulation (Crisp Inputs)
+# Example: Service is 6.5/10, Food is 9.8/10
+tipping_simulation.input['service'] = 6.5
+tipping_simulation.input['food'] = 9.8
+
+# Compute the result (runs the entire FIS process: Fuzzification ->
+# Inference -> Defuzzification)
+tipping_simulation.compute()
+
+# Get the crisp output value
+tip_amount = tipping_simulation.output['tip']
+
+# --- 6. Display Results ---
+print(f"Service Rating: 6.5/10")
+print(f"Food Rating: 9.8/10")
+print(f"*** Recommended Tip: {tip_amount:.2f}% ***")
+
+# Optional: Visualize the final result
+# The `tip.view` method shows the aggregated output fuzzy set
+# and the resulting crisp value (vertical line)
+tip.view(sim=tipping_simulation)
+plt.show()
+
+# --- Example 2: Testing different inputs ---
+print("\n--- Example 2: Poor Service/Bad Food ---")
+tipping_simulation.input['service'] = 2
+tipping_simulation.input['food'] = 3
+tipping_simulation.compute()
+print(f"Recommended Tip: {tipping_simulation.output['tip']:.2f}%")
 
 
 
 
-#_4 Read csv,excel,web
+#_3 Defuzzification Techniques
 import numpy as np
-import pandas as pd
-df_csv=pd.read_csv('iris.csv')
-df_csv.head()
-#web
-url="https://raw.githubusercontent.com/xingcheng003/iris.csv/master/iris.csv"
-df_web=pd.read_csv(url)
-df_web.head()
-#dataset information for df_web
-print('Shape of df_web:')
-display(df_web.shape)
+import skfuzzy as fuzz
+import matplotlib.pyplot as plt
 
-#Numeric summary for df_web
-print('\nNumeric Summary of df_web:')
-display(df_web.describe())
+def demonstrate_defuzzification(universe, aggregated_mf):
+    """
+    Applies and compares five common defuzzification techniques to a
+given
+    aggregated membership function (MF).
+    """
+
+    # 1. Centroid (CoG/CoM) - Most common and robust
+    # Calculates the center of gravity of the area under the curve.
+    cog = fuzz.defuzz(universe, aggregated_mf, 'centroid')
+
+    # 2. Bisector (BoA)
+    # Finds the vertical line that divides the area under the curve into two
+    # equal halves.
+    boa = fuzz.defuzz(universe, aggregated_mf, 'bisector')
+
+    # 3. Mean of Maximum (MoM)
+    # Calculates the average of all points in the universe that have the
+    # maximum membership value (height).
+    mom = fuzz.defuzz(universe, aggregated_mf, 'mom')
+
+    # 4. Smallest of Maximum (SoM)
+    # Calculates the smallest value in the universe that has the maximum
+    # membership value.
+    som = fuzz.defuzz(universe, aggregated_mf, 'som')
+
+    # 5. Largest of Maximum (LoM)
+    # Calculates the largest value in the universe that has the maximum
+    # membership value.
+    lom = fuzz.defuzz(universe, aggregated_mf, 'lom')
+
+    # --- Print Results ---
+    print("--- Defuzzification Results ---")
+    print(f"Centroid (CoG):        {cog:.4f}")
+    print(f"Bisector (BoA):        {boa:.4f}")
+    print(f"Mean of Maximum (MoM): {mom:.4f}")
+    print(f"Smallest of Max (SoM): {som:.4f}")
+    print(f"Largest of Max (LoM):  {lom:.4f}")
+
+    # --- Plot Visualization ---
+    plt.figure(figsize=(10, 6))
+    plt.plot(universe, aggregated_mf, 'b', linewidth=2.5, label='Aggregated Fuzzy Set')
+
+    # Plot the results of each defuzzification method
+    plt.axvline(cog, color='r', linestyle='--', label=f'Centroid ({cog:.2f})')
+    plt.axvline(boa, color='g', linestyle='-.', label=f'Bisector ({boa:.2f})')
+    plt.plot([mom, mom], [0, 1.0], 'k:', label=f'MoM ({mom:.2f})') # Using a
+    # vertical line for MoM
+    plt.plot([som, som], [0, 1.0], 'c:', label=f'SoM ({som:.2f})')
+    plt.plot([lom, lom], [0, 1.0], 'm:', label=f'LoM ({lom:.2f})')
+
+    plt.title('Comparison of Defuzzification Techniques')
+    plt.ylabel('Membership Degree')
+    plt.xlabel('Output Universe')
+    plt.ylim(0, 1.1)
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+# --- 1. Define the Universe of Discourse and Fuzzy Set ---
+
+# The universe (range of possible output values, e.g., tip percentage 0 to 25)
+X = np.arange(0, 26, 0.1)
+# An example of an aggregated output fuzzy set (a trapezoid + a triangle)
+# In a real FIS, this is the result of applying all rules (Inference) and
+# combining the outputs (Aggregation).
+# We simulate a skewed/complex aggregated set to show diAerences in
+# methods.
+mf_1 = fuzz.trapmf(X, [0, 5, 8, 11])
+mf_2 = fuzz.trimf(X, [9, 15, 25])
+# The final aggregated set is usually the maximum (union) of all rule
+# consequences
+# Note: Since the output is the result of aggregation, it is an array of
+# membership values.
+aggregated_mf = np.fmax(mf_1 * 0.7, mf_2 * 1.0) # Assume mf_1 was
+# scaled down by rule strength 0.7
+# Run the demonstration
+demonstrate_defuzzification(X, aggregated_mf)
 
 
-#mean, mode, median for df_web
-print('\nMean of df_web:')
-display(df_web.mean(numeric_only=True))
-print('\nMedian of df_web:')
-display(df_web.median(numeric_only=True))
-print('\nMode of df_web:')
-display(df_web.mode())
-
-#Std deviation and Variance for df_web
-print('\nStandard Deviation of df_web:')
-display(df_web.std(numeric_only=True))
-print('\nVariance of df_web:')
-display(df_web.var(numeric_only=True))
 
 
-#Skewness and Kurtosis for df_web
-print('\nSkewness of df_web:')
-display(df_web.skew(numeric_only=True))
-print('\nKurtosis of df_web:')
-display(df_web.kurtosis(numeric_only=True))
-
-#Frequency count for df_web
-print('\nFrequency Count for species:')
-df_csv['species'].value_counts()
-
-#Group-wise Descriptive Analytics for df_web
-print('\nGroup-wise Mean by species:')
-display(df_csv.groupby('species').mean())
-print('\nGroup-wise Median by species:')
-display(df_csv.groupby('species').median())
-print('\nGroup-wise Standard Deviation by species:')
-display(df_csv.groupby('species').std())
-print('\nGroup-wise Variance by species:')
-display(df_csv.groupby('species').var())
-
-#Correlation Analysis for df_web
-print('\nCorrelation Matrix of df_web:')
-display(df_csv.corr(numeric_only=True))
-
-#dectect missing values for df_web
-print('\nMissing values in df_web:')
-display(df_web.isnull().sum())
-
-#sample data selction for df_web
-print('\nSample data selection for sepal_length and petal_length:')
-display(df_csv[['sepal_length', 'petal_length']].head())
-
-
-
-
-
-#_5 pima and uci
-import pandas as pd
+#_4 Implementation of single layer sepectrom
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression, LogisticRegression
-from sklearn.metrics import accuracy_score, mean_squared_error, r2_score, confusion_matrix
-#pima import
-url="https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv"
 
-columns=["pregnancies",
-    "glucose",
-    "blood pressure",
-    "skin thickness",
-    "insulin",
-    "bmi",
-    "diabetesPedigreeFunction",
-    "age",
-    "Outcome"]
-df_pima=pd.read_csv(url)
-df_pima=pd.read_csv(url,names=columns)
-df_pima = df_pima.dropna() # Added to handle potential NaN values
-df_pima.head()
-#Uci import
-from sklearn.datasets import load_diabetes
-diabetes=load_diabetes()
-df_uci=pd.DataFrame(diabetes.data,columns=diabetes.feature_names)
-df_uci['target']=diabetes.target
-df_uci.head()
-###univriate anaiysis
-df_pima.describe()
-df_pima.mean()
-df_pima.median()
-df_pima.mode()
-df_pima.var()
-df_pima.std()
-df_pima.kurtosis()
-df_pima.skew()
-for col in df_pima.columns[:-1]:
-  sns.histplot(df_pima[col], kde=True)
-  plt.title(f'Pima: {col}')
-  plt.show()
-####bivarite analysis
-plt.figure(figsize=(10,6))
-sns.heatmap(df_pima.corr(),annot=True,cmap="coolwarm")
-plt.title("Correlation")
+# --- 1. Define the Activation Function (Step Function) ---
+def step_function(weighted_sum):
+    """
+    The Perceptron uses a Heaviside step function as its activation.
+    It returns 1 (activate) if the weighted sum is non-negative, else 0 (deactivate).
+    """
+    return 1 if weighted_sum >= 0 else 0
+
+# --- 2. Define the Perceptron Class ---
+class Perceptron:
+    """
+    Implements the core learning logic of a Single-Layer Perceptron.
+    """
+    def __init__(self, num_inputs, learning_rate=0.1, max_epochs=100):
+        # Initialize weights (W) and bias (b). We start with small random weights.
+        # W has size (num_inputs) and b is a single scalar.
+        self.weights = np.random.uniform(low=-0.5, high=0.5, size=num_inputs)
+        self.bias = np.random.uniform(low=-0.5, high=0.5, size=1)
+        self.learning_rate = learning_rate
+        self.max_epochs = max_epochs
+        
+        # History to track error over epochs
+        self.errors = []
+
+    def predict(self, inputs):
+        """
+        Calculates the weighted sum and applies the step function.
+        Output = step( (W . X) + b )
+        """
+        # (W . X) is the dot product of weights and input features
+        weighted_sum = np.dot(inputs, self.weights) + self.bias
+        
+        # Apply the activation function
+        return step_function(weighted_sum)
+
+    def train(self, training_inputs, labels):
+        """
+        Trains the perceptron using the Perceptron Learning Rule.
+        Weights are updated only when a misclassification occurs.
+        """
+        print(f"--- Training Perceptron (Epochs: {self.max_epochs}, Rate: {self.learning_rate}) ---")
+        
+        for epoch in range(self.max_epochs):
+            total_error = 0
+            
+            # Iterate through each training example
+            for inputs, label in zip(training_inputs, labels):
+                
+                # Forward Pass: Predict the output
+                prediction = self.predict(inputs)
+                
+                # Calculate the error
+                error = label - prediction
+                total_error += abs(error)
+                
+                # Backward Pass: Update weights and bias only if error is non-zero
+                if error != 0:
+                    # Perceptron Update Rule: 
+                    # W_new = W_old + LR * error * X
+                    # b_new = b_old + LR * error * 1
+                    self.weights += self.learning_rate * error * inputs
+                    self.bias += self.learning_rate * error * 1 # Bias update
+                    
+            # Record error for tracking convergence
+            self.errors.append(total_error)
+            
+            # Check for convergence: Stop if all samples are classified correctly
+            if total_error == 0:
+                print(f"✅ Converged successfully at Epoch {epoch + 1}.")
+                break
+                
+            if (epoch + 1) % 10 == 0:
+                 print(f"Epoch {epoch + 1}/{self.max_epochs}, Total Error: {total_error}")
+
+        print("\n--- Training Complete ---")
+        print(f"Final Weights: {self.weights}")
+        print(f"Final Bias: {self.bias[0]:.4f}")
+
+
+# --- 3. Prepare Data for AND Gate (A Linearly Separable Problem) ---
+
+# Input data (A, B)
+X_train = np.array([
+    [0, 0], # Input 1
+    [0, 1], # Input 2
+    [1, 0], # Input 3
+    [1, 1]  # Input 4
+])
+
+# Output labels (A AND B)
+y_train = np.array([0, 0, 0, 1])
+
+# --- 4. Run the Perceptron Model ---
+
+# Initialize the Perceptron with 2 inputs (features)
+perceptron = Perceptron(num_inputs=X_train.shape[1], learning_rate=0.1, max_epochs=50)
+
+# Train the model
+perceptron.train(X_train, y_train)
+
+# --- 5. Test the Trained Model ---
+
+print("\n--- Testing Model Predictions ---")
+test_cases = X_train
+test_labels = y_train
+
+for inputs, expected in zip(test_cases, test_labels):
+    prediction = perceptron.predict(inputs)
+    status = "Correct" if prediction == expected else "Incorrect"
+    print(f"Input: {inputs}, Predicted: {prediction}, Expected: {expected} ({status})")
+
+# Optional: Visualize the error history
+plt.figure(figsize=(8, 4))
+plt.plot(perceptron.errors, marker='o')
+plt.title('Perceptron Training Error Over Epochs')
+plt.xlabel('Epoch')
+plt.ylabel('Total Misclassifications')
+plt.grid(True)
 plt.show()
-# Loop through all columns except 'Outcome'
-for col in df_pima.columns[:-1]:
-  plt.figure(figsize=(6, 4))
-  sns.boxplot(x='Outcome', y=col, data=df_pima)
-  plt.title(f'{col} vs Outcome (Pima)')
-  plt.show()
-
-#Liner regression
-X = df_pima[['glucose']]
-y = df_pima['Outcome']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-lin_model = LinearRegression()
-lin_model.fit(X_train, y_train)
-y_pred = lin_model.predict(X_test)
-print("Coefficient:", lin_model.coef_[0])
-print("Intercept:", lin_model.intercept_)
-print("R² score:", r2_score(y_test, y_pred))
-plt.scatter(X, y, alpha=0.5)
-plt.plot(X, lin_model.predict(X), color='red')
-plt.xlabel("Glucose")
-plt.ylabel("Outcome")
-plt.title("Linear Regression: Glucose vs Outcome")
-plt.show()
-
-#Logistic Regression
-log_model = LogisticRegression()
-log_model.fit(X_train, y_train)
-y_pred = log_model.predict(X_test)
-print("Coefficient:", log_model.coef_[0][0])
-print("Accuracy:", accuracy_score(y_test, y_pred))
-X_range = np.linspace(X.min(), X.max(), 100).reshape(-1, 1)
-y_prob = log_model.predict_proba(X_range)[:, 1]
-plt.scatter(X, y, alpha=0.4)
-plt.plot(X_range, y_prob, color='red')
-plt.xlabel("Glucose")
-plt.ylabel("Probability of Diabetes")
-plt.title("Logistic Regression: Glucose vs Outcome")
-plt.show()
 
 
-####Multiple Regression 
-features = ['glucose', 'bmi', 'age', 'pregnancies']
-X = df_pima[features]
-y = df_pima['Outcome']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-#liner regression
-multi_lin_model = LinearRegression()
-multi_lin_model.fit(X_train, y_train)
-y_pred = multi_lin_model.predict(X_test)
-coefficients = pd.DataFrame(multi_lin_model.coef_, index=features, columns=['Coefficient'])
-print(coefficients)
-print("R² score:", r2_score(y_test, y_pred))
-coefficients.plot(kind='bar')
-plt.title("Multiple Linear Regression Coefficients")
-plt.ylabel("Coefficient Value Or features importance")
-plt.show()
-#logistic regression
-multi_log_model = LogisticRegression(max_iter=1000)
-multi_log_model.fit(X_train, y_train)
 
-y_pred = multi_log_model.predict(X_test)
 
-coefficients = pd.DataFrame(multi_log_model.coef_[0], index=features, columns=['Coefficient'])
-print(coefficients)
-print("Accuracy:", accuracy_score(y_test, y_pred))
-coefficients.plot(kind='bar', color='orange')
-plt.title("Multiple Logistic Regression Coefficients")
-plt.ylabel("Coefficient Value")
-plt.show()
 
-##Uci dataset
-#bivariate
-df_uci['target_bin'] = pd.qcut(df_uci['target'], q=3, labels=['Low', 'Medium', 'High'])
-for col in df_uci.columns[:-2]:  # exclude 'target' and 'target_bin'
-  plt.figure(figsize=(6, 4))
-  sns.boxplot(x='target_bin', y=col, data=df_uci)
-  plt.title(f'{col} vs Target Bin (UCI)')
-  plt.show()
-#liner 
-X_bmi = df_uci[['bmi']]
-y = df_uci['target']
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X_bmi, y, test_size=0.2, random_state=42
+
+#_5 Multilayer Perceptron
+import numpy as np
+
+# --- 1. Define Activation and Derivative Functions (Sigmoid) ---
+
+def sigmoid(x):
+    """Sigmoid activation function: 1 / (1 + e^(-x))"""
+    # Prevents overflow in e^(-x) for very large negative numbers
+    x = np.clip(x, -500, 500) 
+    return 1 / (1 + np.exp(-x))
+
+def sigmoid_derivative(output):
+    """Derivative of the sigmoid function, calculated using the output of the sigmoid."""
+    # Derivative is O * (1 - O), where O is the output of the sigmoid.
+    return output * (1 - output)
+
+# --- 2. Define the Multilayer Perceptron Class ---
+class MLP_Backpropagation:
+    """
+    Implements a simple two-layer Multilayer Perceptron (Input -> Hidden -> Output).
+    """
+    def __init__(self, input_size, hidden_size, output_size, learning_rate=0.1, max_epochs=10000):
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.output_size = output_size
+        self.learning_rate = learning_rate
+        self.max_epochs = max_epochs
+        
+        # Initialize Weights and Biases randomly (W_ih: Input to Hidden, W_ho: Hidden to Output)
+        # Weights should be initialized small to prevent saturation of the sigmoid function.
+        self.W_ih = np.random.uniform(low=-0.5, high=0.5, size=(input_size, hidden_size))
+        self.b_h = np.zeros((1, hidden_size)) # Bias for hidden layer
+        
+        self.W_ho = np.random.uniform(low=-0.5, high=0.5, size=(hidden_size, output_size))
+        self.b_o = np.zeros((1, output_size)) # Bias for output layer
+        
+        self.errors = [] # To track mean squared error
+
+    def forward_pass(self, X):
+        """
+        Calculates the output for a given input X.
+        Z = WX + b; A = f(Z)
+        """
+        # Hidden Layer Calculation (Input -> Hidden)
+        self.net_h = np.dot(X, self.W_ih) + self.b_h
+        self.out_h = sigmoid(self.net_h)
+        
+        # Output Layer Calculation (Hidden -> Output)
+        self.net_o = np.dot(self.out_h, self.W_ho) + self.b_o
+        self.out_o = sigmoid(self.net_o)
+        
+        return self.out_o
+
+    def backward_pass(self, X, y, out_o, out_h):
+        """
+        Calculates and applies weight updates based on the error.
+        This is the core of the Backpropagation algorithm.
+        """
+        # --- A. Output Layer Error and Delta ---
+        # Error = Target - Output
+        error_o = y - out_o
+        # Output Delta (d_o) = Error * f'(net_o)
+        d_o = error_o * sigmoid_derivative(out_o)
+        
+        # --- B. Hidden Layer Error and Delta (Error Backpropagation) ---
+        # Error_h = Delta_o * W_ho^T 
+        # The error is propagated back using the weights W_ho.
+        error_h = d_o.dot(self.W_ho.T)
+        # Hidden Delta (d_h) = Error_h * f'(net_h)
+        d_h = error_h * sigmoid_derivative(out_h)
+        
+        # --- C. Weight and Bias Updates (Gradient Descent) ---
+        
+        # Update W_ho (Hidden to Output Weights)
+        # dW_ho = out_h.T . d_o
+        self.W_ho += self.out_h.T.dot(d_o) * self.learning_rate
+        self.b_o += np.sum(d_o, axis=0, keepdims=True) * self.learning_rate
+        
+        # Update W_ih (Input to Hidden Weights)
+        # dW_ih = X.T . d_h
+        self.W_ih += X.T.dot(d_h) * self.learning_rate
+        self.b_h += np.sum(d_h, axis=0, keepdims=True) * self.learning_rate
+        
+        return np.mean(error_o**2)
+
+    def train(self, X_train, y_train):
+        """
+        Main training loop.
+        """
+        print(f"--- Training MLP (Hidden Size: {self.hidden_size}, Rate: {self.learning_rate}) ---")
+        
+        for epoch in range(self.max_epochs):
+            # 1. Forward Pass
+            out_o = self.forward_pass(X_train)
+            
+            # 2. Backward Pass (Calculate Error and Update Weights)
+            mse = self.backward_pass(X_train, y_train, out_o, self.out_h)
+            
+            self.errors.append(mse)
+            
+            if (epoch + 1) % 1000 == 0:
+                print(f"Epoch {epoch + 1}/{self.max_epochs}, Mean Squared Error: {mse:.6f}")
+
+        print("\n--- Training Complete ---")
+
+# --- 3. Prepare Data for XOR Gate (A Non-Linearly Separable Problem) ---
+
+# Input data (A, B) - 4 samples, 2 features
+X_train = np.array([
+    [0, 0], 
+    [0, 1], 
+    [1, 0], 
+    [1, 1]  
+])
+
+# Output labels (A XOR B) - 4 samples, 1 output
+y_train = np.array([
+    [0], 
+    [1], 
+    [1], 
+    [0]
+])
+
+# --- 4. Run the MLP Model ---
+
+# Model Configuration: 2 inputs, 4 hidden neurons, 1 output
+mlp = MLP_Backpropagation(
+    input_size=2, 
+    hidden_size=4, 
+    output_size=1, 
+    learning_rate=0.2, 
+    max_epochs=10000
 )
-model_lr = LinearRegression()
-model_lr.fit(X_train, y_train)
-y_pred = model_lr.predict(X_test)
-plt.figure(figsize=(6,4))
-plt.scatter(X_test, y_test, color="blue", label="Actual values")
-plt.plot(X_test, y_pred, color="red", label="Regression line")
-plt.xlabel("BMI")
-plt.ylabel("Target")
-plt.title("Linear Regression: BMI vs Target")
+
+# Train the model
+mlp.train(X_train, y_train)
+
+# --- 5. Test the Trained Model ---
+
+print("\n--- Testing Model Predictions ---")
+
+# Pass the training data through the trained network
+predictions = mlp.forward_pass(X_train)
+
+for inputs, prediction, expected in zip(X_train, predictions, y_train):
+    # Apply a threshold of 0.5 to convert the sigmoid output (0 to 1) into a binary prediction (0 or 1)
+    predicted_class = 1 if prediction[0] >= 0.5 else 0
+    status = "Correct" if predicted_class == expected[0] else "Incorrect"
+    
+    # Print prediction as a continuous value and its thresholded class
+    print(f"Input: {inputs}, Output: {prediction[0]:.4f}, Predicted Class: {predicted_class}, Expected: {expected[0]} ({status})")
+
+# Optional: Visualize the error history
+import matplotlib.pyplot as plt
+plt.figure(figsize=(10, 5))
+plt.plot(mlp.errors)
+plt.title('MLP Training Error (Mean Squared Error) Over Epochs')
+plt.xlabel('Epoch')
+plt.ylabel('MSE')
+plt.grid(True)
+plt.show()
+
+
+
+
+
+
+
+#_6 Simple Neural Network (McCulloh Pitts model)
+import numpy as np
+
+# --- 1. Activation Function (Threshold Logic) ---
+
+def mcp_activation(net_input, threshold):
+    """
+    The MCP neuron uses a fixed threshold activation.
+    Output = 1 (Fires) if net_input >= threshold, else 0 (Does not fire).
+    """
+    return 1 if net_input >= threshold else 0
+
+# --- 2. The MCP Neuron Function ---
+
+def mcp_neuron(inputs, weights, threshold):
+    """
+    Simulates the McCulloch-Pitts neuron calculation.
+    net_input = Sum(input_i * weight_i)
+    Output = mcp_activation(net_input, threshold)
+    """
+    # Convert inputs and weights to NumPy arrays for easy dot product
+    inputs = np.array(inputs)
+    weights = np.array(weights)
+    
+    # Calculate the net input (Weighted Sum)
+    net_input = np.dot(inputs, weights)
+    
+    # Determine the output based on the fixed threshold
+    output = mcp_activation(net_input, threshold)
+    
+    return net_input, output
+
+# --- 3. Implementation of Logical Gates ---
+
+def implement_or_gate():
+    """Simulates the Logical OR gate (Output is 1 if EITHER input is 1)."""
+    
+    print("\n--- Implementing Logical OR Gate ---")
+    
+    # Fixed parameters for OR Gate:
+    # We want (1*1) + (1*0) >= 1  -> 1 >= 1 (True)
+    # We want (0*0) + (0*0) >= 1  -> 0 >= 1 (False)
+    weights = [1, 1]  # Equal importance for both inputs
+    threshold = 1     # Fire if at least one weighted input is 1
+    
+    test_cases = [
+        ([0, 0], 0),
+        ([0, 1], 1),
+        ([1, 0], 1),
+        ([1, 1], 1)
+    ]
+    
+    print(f"Weights: {weights}, Threshold: {threshold}")
+    print("Input (A, B) | Net Input | Output | Expected")
+    print("-" * 38)
+    
+    for inputs, expected in test_cases:
+        net_input, output = mcp_neuron(inputs, weights, threshold)
+        print(f"  {inputs[0]}, {inputs[1]}    |   {net_input}      |    {output}   |   {expected}")
+
+
+def implement_not_gate():
+    """Simulates the Logical NOT gate (Output is the inverse of the input)."""
+    
+    print("\n--- Implementing Logical NOT Gate ---")
+    
+    # Fixed parameters for NOT Gate (Single Input):
+    # We need a strong negative weight to inhibit firing when the input is 1.
+    weights = [-1]    # Negative weight for the single input
+    threshold = 0     # Needs to be low (non-positive)
+    
+    test_cases = [
+        ([0], 1),
+        ([1], 0)
+    ]
+    
+    print(f"Weights: {weights}, Threshold: {threshold}")
+    print("Input (A) | Net Input | Output | Expected")
+    print("-" * 38)
+    
+    for inputs, expected in test_cases:
+        net_input, output = mcp_neuron(inputs, weights, threshold)
+        print(f"    {inputs[0]}   |    {net_input}      |    {output}   |   {expected}")
+
+# --- 4. Run the Implementations ---
+
+implement_or_gate()
+implement_not_gate()
+
+
+
+
+
+
+#_7 GeneticAlgorithm(GA).
+import random
+
+# Objective function
+def fitness(x):
+    return x * x
+
+# Generate initial population
+def initialize_population(size):
+    return [random.uniform(-10, 10) for _ in range(size)]
+
+# Selection (Tournament Selection)
+def selection(population):
+    a, b = random.sample(population, 2)
+    return a if fitness(a) < fitness(b) else b
+
+# Crossover
+def crossover(parent1, parent2):
+    alpha = random.random()
+    return alpha * parent1 + (1 - alpha) * parent2
+
+# Mutation
+def mutation(child, rate=0.1):
+    if random.random() < rate:
+        child += random.uniform(-1, 1)
+    return child
+
+# Genetic Algorithm
+def genetic_algorithm():
+    population_size = 20
+    generations = 50
+
+    population = initialize_population(population_size)
+
+    for _ in range(generations):
+        new_population = []
+        for _ in range(population_size):
+            p1 = selection(population)
+            p2 = selection(population)
+            child = crossover(p1, p2)
+            child = mutation(child)
+            new_population.append(child)
+        population = new_population
+
+    best = min(population, key=fitness)
+    print("Best solution:", best)
+    print("Minimum value:", fitness(best))
+
+genetic_algorithm()
+
+
+
+
+
+
+#_8 Solving Travel lingSalesman Problem using GA
+import random
+import numpy as np
+
+# Distance matrix
+distance = np.array([
+    [0, 10, 15, 20],
+    [10, 0, 35, 25],
+    [15, 35, 0, 30],
+    [20, 25, 30, 0]
+])
+
+NUM_CITIES = 4
+POP_SIZE = 10
+GENERATIONS = 100
+MUTATION_RATE = 0.2
+
+# Calculate total distance
+def total_distance(tour):
+    return sum(distance[tour[i], tour[(i + 1) % NUM_CITIES]]
+               for i in range(NUM_CITIES))
+
+# Fitness function
+def fitness(tour):
+    return 1 / total_distance(tour)
+
+# Initial population
+def create_population():
+    return [random.sample(range(NUM_CITIES), NUM_CITIES)
+            for _ in range(POP_SIZE)]
+
+# Tournament selection
+def selection(population):
+    a, b = random.sample(population, 2)
+    return a if fitness(a) > fitness(b) else b
+
+# Ordered crossover (OX)
+def crossover(p1, p2):
+    start, end = sorted(random.sample(range(NUM_CITIES), 2))
+    child = [-1] * NUM_CITIES
+    child[start:end] = p1[start:end]
+    pointer = end
+
+    for city in p2:
+        if city not in child:
+            if pointer >= NUM_CITIES:
+                pointer = 0
+            child[pointer] = city
+            pointer += 1
+    return child
+
+# Swap mutation
+def mutation(tour):
+    if random.random() < MUTATION_RATE:
+        i, j = random.sample(range(NUM_CITIES), 2)
+        tour[i], tour[j] = tour[j], tour[i]
+    return tour
+
+# Genetic Algorithm
+population = create_population()
+
+for _ in range(GENERATIONS):
+    new_population = []
+    for _ in range(POP_SIZE):
+        parent1 = selection(population)
+        parent2 = selection(population)
+        child = crossover(parent1, parent2)
+        child = mutation(child)
+        new_population.append(child)
+    population = new_population
+
+# Best solution
+best_tour = min(population, key=total_distance)
+print("Best tour:", best_tour)
+print("Minimum distance:", total_distance(best_tour))
+
+
+
+
+
+
+#_9  Design of Adaptive Neuro-Fuzzy Inference System(ANFIS).
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Gaussian Membership Function
+def gaussmf(x, c, sigma):
+    return np.exp(-((x - c) ** 2) / (2 * sigma ** 2))
+
+# ANFIS Class
+class ANFIS:
+    def __init__(self, X, Y):
+        self.X = X
+        self.Y = Y
+        self.n = X.shape[0]
+
+        # Membership parameters
+        self.c1, self.s1 = 0.0, 1.0
+        self.c2, self.s2 = 1.0, 1.0
+
+        # Consequent parameters
+        self.p = np.random.rand(2)
+        self.q = np.random.rand(2)
+        self.r = np.random.rand(2)
+
+        self.errors = []
+
+    def train(self, epochs=100, lr=0.01):
+        for _ in range(epochs):
+            error_sum = 0
+            for i in range(self.n):
+                x1, x2 = self.X[i]
+                y = self.Y[i]
+
+                # Layer 1: Fuzzification
+                mu1 = gaussmf(x1, self.c1, self.s1)
+                mu2 = gaussmf(x2, self.c2, self.s2)
+
+                # Layer 2: Rule strength
+                w1, w2 = mu1, mu2
+
+                # Layer 3: Normalization
+                w1n = w1 / (w1 + w2)
+                w2n = w2 / (w1 + w2)
+
+                # Layer 4: Consequent
+                f1 = self.p[0]*x1 + self.q[0]*x2 + self.r[0]
+                f2 = self.p[1]*x1 + self.q[1]*x2 + self.r[1]
+
+                # Layer 5: Output
+                y_pred = w1n*f1 + w2n*f2
+
+                error = y - y_pred
+                error_sum += error**2
+
+                # Update parameters
+                self.p += lr * error
+                self.q += lr * error
+                self.r += lr * error
+
+            self.errors.append(error_sum)
+
+    def predict(self, X):
+        out = []
+        for x1, x2 in X:
+            mu1 = gaussmf(x1, self.c1, self.s1)
+            mu2 = gaussmf(x2, self.c2, self.s2)
+
+            w1n = mu1 / (mu1 + mu2)
+            w2n = mu2 / (mu1 + mu2)
+
+            f1 = self.p[0]*x1 + self.q[0]*x2 + self.r[0]
+            f2 = self.p[1]*x1 + self.q[1]*x2 + self.r[1]
+
+            out.append(w1n*f1 + w2n*f2)
+
+        return np.array(out)
+
+# ---------------------------
+# Dataset
+# ---------------------------
+X = np.array([
+    [0, 0],
+    [0, 1],
+    [1, 0],
+    [1, 1]
+])
+
+Y = np.array([0, 1, 1, 0])
+
+# ---------------------------
+# Train Model
+# ---------------------------
+model = ANFIS(X, Y)
+model.train(epochs=100, lr=0.01)
+
+# ---------------------------
+# Test Model
+# ---------------------------
+print("Actual Output :", Y)
+print("Predicted Output :", model.predict(X))
+
+# ---------------------------
+# Error Plot
+# ---------------------------
+plt.plot(model.errors)
+plt.xlabel("Epochs")
+plt.ylabel("Error")
+plt.title("ANFIS Training Error")
+plt.grid()
+plt.show()
+
+
+
+
+#_10 Comparison of Hard and Soft Computing Techniques
+# ---------------- HARD COMPUTING ----------------
+# Exact rule-based decision (Deterministic)
+
+def hard_temperature(temp):
+    if temp < 25:
+        return "Cold"
+    else:
+        return "Hot"
+
+
+# ---------------- SOFT COMPUTING ----------------
+# Approximate decision (Fuzzy-like logic)
+
+def soft_temperature(temp):
+    if temp <= 20:
+        return "Cold"
+    elif 20 < temp <= 30:
+        return "Warm"
+    else:
+        return "Hot"
+
+
+# ---------------- TEST VALUES ----------------
+temperature = [18, 25, 28, 35]
+
+print("Temperature | Hard Computing | Soft Computing")
+print("---------------------------------------------")
+
+for t in temperature:
+    print(f"{t}°C         | {hard_temperature(t):13} | {soft_temperature(t)}")
+
+
+
+
+
+
+#_11 Particle Swarm Optimization (PSO)
+import numpy as np 
+ 
+# Rastrigin function 
+def rastrigin(X): 
+    A = 10 
+    return A * len(X) + np.sum(X**2 - A * np.cos(2 * np.pi * X)) 
+ 
+# PSO parameters 
+num_particles = 30 
+dimensions = 2 
+iterations = 100 
+w = 0.7       # inertia 
+c1 = 1.5      # cognitive 
+c2 = 1.5      # social 
+ 
+# Initialize particles 
+X = np.random.uniform(-5.12, 5.12, (num_particles, dimensions)) 
+V = np.random.uniform(-1, 1, (num_particles, dimensions)) 
+ 
+pbest = X.copy() 
+pbest_val = np.array([rastrigin(x) for x in X]) 
+ 
+gbest = pbest[np.argmin(pbest_val)] 
+gbest_val = min(pbest_val) 
+ 
+# PSO loop 
+for _ in range(iterations): 
+    for i in range(num_particles): 
+        r1, r2 = np.random.rand(), np.random.rand() 
+        V[i] = (w * V[i] + 
+                c1 * r1 * (pbest[i] - X[i]) + 
+                c2 * r2 * (gbest - X[i])) 
+        X[i] = X[i] + V[i] 
+ 
+        fitness = rastrigin(X[i]) 
+        if fitness < pbest_val[i]: 
+            pbest[i] = X[i] 
+            pbest_val[i] = fitness 
+ 
+    gbest = pbest[np.argmin(pbest_val)] 
+    gbest_val = min(pbest_val) 
+ 
+print("Global Minimum Position:", gbest) 
+print("Minimum Value:", gbest_val) 
+
+
+
+
+
+
+
+#_12 PSO for Load Balancing (Makespan Minimization) 
+import numpy as np 
+import random 
+ 
+# ------------------------------- 
+# Problem Parameters 
+# ------------------------------- 
+N = 6                      # number of tasks 
+M = 3                      # number of machines 
+task_time = np.array([2, 4, 6, 3, 5, 7]) 
+ 
+num_particles = 20 
+iterations = 50 
+w, c1, c2 = 0.7, 1.5, 1.5 
+ 
+# ------------------------------- 
+# Fitness Function (Makespan) 
+# ------------------------------- 
+def fitness(position): 
+    loads = np.zeros(M) 
+    for i in range(N): 
+        machine = int(round(position[i])) % M 
+        loads[machine] += task_time[i] 
+    return max(loads) 
+ 
+# ------------------------------- 
+# PSO Initialization 
+# ------------------------------- 
+particles = np.random.randint(0, M, (num_particles, N)) 
+velocities = np.zeros((num_particles, N)) 
+ 
+pbest = particles.copy() 
+pbest_fitness = np.array([fitness(p) for p in particles]) 
+ 
+gbest = pbest[np.argmin(pbest_fitness)] 
+gbest_fitness = min(pbest_fitness) 
+ 
+# ------------------------------- 
+# PSO Main Loop 
+# ------------------------------- 
+for _ in range(iterations): 
+    for i in range(num_particles): 
+        r1, r2 = random.random(), random.random() 
+        velocities[i] = (w * velocities[i] + 
+                          c1 * r1 * (pbest[i] - particles[i]) + 
+                          c2 * r2 * (gbest - particles[i])) 
+        particles[i] = particles[i] + velocities[i] 
+ 
+        fit = fitness(particles[i]) 
+        if fit < pbest_fitness[i]: 
+            pbest[i] = particles[i] 
+            pbest_fitness[i] = fit 
+ 
+    gbest = pbest[np.argmin(pbest_fitness)] 
+    gbest_fitness = min(pbest_fitness) 
+ 
+# ------------------------------- 
+# Result 
+# ------------------------------- 
+print("Best Task Allocation (task → machine):", np.round(gbest).astype(int)) 
+print("Minimum Makespan:", gbest_fitness) 
+
+
+
+
+
+#_13  train an LSTM to predict the next value in a univariate 
+time series
+import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense
+from sklearn.preprocessing import MinMaxScaler
+# -----------------------------
+# Generate sine wave + noise
+# -----------------------------
+np.random.seed(1)
+t = np.arange(0, 200, 0.1)
+series = np.sin(t) + 0.1 * np.random.randn(len(t))
+# -----------------------------
+# Prepare data
+# -----------------------------
+scaler = MinMaxScaler()
+series_scaled = scaler.fit_transform(series.reshape(-1,1))
+X, y = [], []
+time_steps = 10
+for i in range(len(series_scaled) - time_steps):
+    X.append(series_scaled[i:i+time_steps])
+    y.append(series_scaled[i+time_steps])
+X = np.array(X)
+y = np.array(y)
+# -----------------------------
+# Build LSTM model
+# -----------------------------
+model = Sequential([
+    LSTM(50, activation='tanh', input_shape=(time_steps, 1)),
+    Dense(1)
+])
+model.compile(optimizer='adam', loss='mse')
+# -----------------------------
+# Train model
+# -----------------------------
+history = model.fit(X, y, epochs=20, batch_size=32, verbose=1)
+# -----------------------------
+# Predict next value
+# -----------------------------
+last_sequence = series_scaled[-time_steps:].reshape(1, time_steps, 1)
+next_value_scaled = model.predict(last_sequence)
+next_value = scaler.inverse_transform(next_value_scaled)
+print("Predicted next value:", next_value[0][0])
+# -----------------------------
+# Plot result
+# -----------------------------
+plt.plot(series, label='Original Series')
+plt.scatter(len(series), next_value[0][0], color='red', label='Predicted Next')
 plt.legend()
 plt.show()
-mse = mean_squared_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
-print("MSE:", mse)
-print("R² Score:", r2)
-#multiple regreggions
-model_multi = LinearRegression()
-model_multi.fit(X_train, y_train)
-y_pred_multi = model_multi.predict(X_test)
-mse_multi = mean_squared_error(y_test, y_pred_multi)
-r2_multi = r2_score(y_test, y_pred_multi)
-print("Multiple Regression MSE:", mse_multi)
-print("Multiple Regression R²:", r2_multi)
-plt.figure(figsize=(6,4))
-plt.scatter(y_test, y_pred_multi)
-plt.xlabel("Actual Target")
-plt.ylabel("Predicted Target")
-plt.title("Actual vs Predicted Values (Multiple Regression)")
-plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], color="red")
-plt.show()
-
-
-
-
-
-#__6 Uci graphs
-import pandas as pd
+# Simple Univariate Time Series Prediction (Python – No TensorFlow)
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from scipy.stats import norm
-from mpl_toolkits.mplot3d import Axes3D
-from sklearn.datasets import load_diabetes
-diabetes=load_diabetes()
-df=pd.DataFrame(diabetes.data,columns=diabetes.feature_names)
-df['target']=diabetes.target
-df.head()
-df.shape
-df.info()
-df.describe()
-#normal curve
-data=df['bmi']
-mu,std=norm.fit(data)
-plt.hist(data,bins=20,density=True)
-xmin,xmax=plt.xlim()
-x=np.linspace(xmin,xmax,100)
-p=norm.pdf(x,mu,std)
-plt.plot(x,p)
-plt.title("Normal Curve")
+# Generate sine wave + noise
+np.random.seed(1)
+t = np.arange(0, 100, 0.1)
+data = np.sin(t) + 0.1 * np.random.randn(len(t))
+# Prepare sequences
+step = 10
+X, y = [], []
+for i in range(len(data) - step):
+    X.append(data[i:i+step])
+    y.append(data[i+step])
+X = np.array(X)
+y = np.array(y)
+# Simple weight-based sequence prediction (LSTM concept demo)
+W = np.random.randn(step)
+predictions = X @ W / step
+
+print("Actual next value:", y[-1])
+print("Predicted next value:", predictions[-1])
+
+
+
+
+
+
+#_14Use an LSTM to perform sentiment classification on a small text 
+dataset 
+import torch 
+import torch.nn as nn 
+import torch.optim as optim 
+ 
+# ----------------------- 
+# Synthetic dataset 
+# ----------------------- 
+sentences = [ 
+    "I love this movie", 
+    "This film is great", 
+    "Amazing experience", 
+    "I hate this movie", 
+    "This film is terrible", 
+    "Worst experience" 
+] 
+labels = [1, 1, 1, 0, 0, 0]   # 1=positive, 0=negative 
+ 
+# ----------------------- 
+# Tokenization 
+# ----------------------- 
+vocab = {} 
+for s in sentences: 
+    for w in s.lower().split(): 
+        if w not in vocab: 
+            vocab[w] = len(vocab) + 1 
+ 
+def encode(sentence): 
+    return [vocab.get(w, 0) for w in sentence.lower().split()] 
+ 
+X = [encode(s) for s in sentences] 
+y = torch.tensor(labels, dtype=torch.float) 
+ 
+# Padding 
+max_len = max(len(seq) for seq in X) 
+X_pad = [seq + [0]*(max_len - len(seq)) for seq in X] 
+X_tensor = torch.tensor(X_pad) 
+ 
+# ----------------------- 
+# LSTM Model 
+# ----------------------- 
+class LSTMClassifier(nn.Module): 
+    def __init__(self, vocab_size): 
+        super().__init__() 
+        self.embed = nn.Embedding(vocab_size + 1, 8, padding_idx=0) 
+        self.lstm = nn.LSTM(8, 16, batch_first=True) 
+        self.fc = nn.Linear(16, 1) 
+        self.sigmoid = nn.Sigmoid() 
+ 
+    def forward(self, x): 
+        x = self.embed(x) 
+        _, (h, _) = self.lstm(x) 
+        return self.sigmoid(self.fc(h[-1])) 
+ 
+model = LSTMClassifier(len(vocab)) 
+criterion = nn.BCELoss() 
+optimizer = optim.Adam(model.parameters(), lr=0.01) 
+ 
+# ----------------------- 
+# Training 
+# ----------------------- 
+for epoch in range(200): 
+    optimizer.zero_grad() 
+    output = model(X_tensor).squeeze() 
+    loss = criterion(output, y) 
+    loss.backward() 
+    optimizer.step() 
+ 
+# ----------------------- 
+# Prediction 
+# ----------------------- 
+test_sentence = "I love this film" 
+test_encoded = encode(test_sentence) 
+test_encoded += [0] * (max_len - len(test_encoded)) 
+test_tensor = torch.tensor([test_encoded]) 
+prediction = model(test_tensor).item() 
+print("Sentiment score (0=negative, 1=positive):", prediction)
+
+
+
+
+
+
+#_15 Implement SOM and use it for clustering and visualization of the Iris 
+dataset 
+import numpy as np 
+import matplotlib.pyplot as plt 
+from sklearn.datasets import load_iris 
+from sklearn.cluster import KMeans 
+# Load Iris dataset 
+iris = load_iris() 
+X = iris.data 
+y = iris.target 
+# Use only 2 features for easy visualization 
+X_vis = X[:, :2] 
+# Apply K-Means 
+kmeans = KMeans(n_clusters=3, random_state=0) 
+clusters = kmeans.fit_predict(X_vis) 
+# Plot clusters 
+plt.figure(figsize=(6,6)) 
+plt.scatter(X_vis[:,0], X_vis[:,1], c=clusters) 
+plt.scatter(kmeans.cluster_centers_[:,0], 
+kmeans.cluster_centers_[:,1], 
+marker='X', s=200) 
+plt.xlabel("Sepal Length") 
+plt.ylabel("Sepal Width") 
+plt.title("K-Means Clustering on Iris Dataset") 
+plt.grid() 
+plt.show() 
+ 
+15b. 
+ 
+import numpy as np 
+import matplotlib.pyplot as plt 
+from sklearn.datasets import load_iris 
+ 
+# Load Iris dataset 
+iris = load_iris() 
+X = iris.data 
+y = iris.target 
+ 
+# Normalize data 
+X = (X - X.min(axis=0)) / (X.max(axis=0) - X.min(axis=0)) 
+ 
+# SOM grid size 
+m, n = 7, 7 
+input_len = X.shape[1] 
+ 
+# Initialize weights 
+weights = np.random.random((m, n, input_len)) 
+ 
+# Training parameters 
+epochs = 1000 
+initial_lr = 0.6 
+initial_radius = max(m, n) / 2 
+ 
+# Training SOM 
+for epoch in range(epochs): 
+    lr = initial_lr * np.exp(-epoch / epochs) 
+    radius = initial_radius * np.exp(-epoch / epochs) 
+ 
+    for sample in X: 
+        # Find Best Matching Unit (BMU) 
+        dist = np.linalg.norm(weights - sample, axis=2) 
+        bmu_x, bmu_y = np.unravel_index(np.argmin(dist), dist.shape) 
+ 
+        # Update weights of BMU and neighbors 
+        for i in range(m): 
+            for j in range(n): 
+                d = np.sqrt((i - bmu_x)**2 + (j - bmu_y)**2) 
+                if d <= radius: 
+                    influence = np.exp(-(d**2) / (2 * (radius**2))) 
+                    weights[i, j] += lr * influence * (sample - weights[i, j]) 
+ 
+# Visualization 
+plt.figure(figsize=(7,7)) 
+markers = ['o', 's', '^'] 
+colors = ['red', 'green', 'blue'] 
+ 
+for i, sample in enumerate(X): 
+    dist = np.linalg.norm(weights - sample, axis=2) 
+    bmu_x, bmu_y = np.unravel_index(np.argmin(dist), dist.shape) 
+    plt.scatter(bmu_x, bmu_y, 
+                c=colors[y[i]], 
+                marker=markers[y[i]], 
+                s=60) 
+ 
+plt.title("Self-Organizing Map (Proper Clustering)") 
+plt.grid() 
 plt.show()
-#Density Plots
-sns.kdeplot(df['bp'],fill=True)
-plt.title("Density Plot")
-plt.show()
-#Contouer Plot
-sns.kdeplot(
-    x=df['bmi'],
-    y=df['bp'],
-    fill=True)
-plt.title("Contour Plot")
-plt.show()
-#Scatter plot
-plt.scatter(df['bmi'],df['target'])
-plt.title("Scatter Plot")
-plt.show()
-#Correraltion map
-plt.figure(figsize=(10,6))
-sns.heatmap(df.corr(),annot=True)
-plt.title("Correlation Map")
-plt.show()
-#histrogram
-plt.hist(df['age'],bins=15)
-plt.title("Histogram")
-plt.show()
-#multiple histogram
-df[['age','bmi','bp']].hist(bins=15,figsize=(10,6))
-plt.show()
-fig=plt.figure()
-ax=fig.add_subplot(111,projection='3d')
-ax.scatter(
-df['bmi'],
-df['bp'],
-df['target']
-)
-ax.set_xlabel('bmi')
-ax.set_ylabel('bp')
-ax.set_zlabel('target')
-plt.title("3D Scatter Plot")
-plt.show()
 
 
 
 
 
-#_7 Car price prediction
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score, mean_absolute_error
-
-# 1. Load dataset
-df = pd.read_csv("car_price_prediction_.csv")
-
-# 2. Basic Info
-print(df.head())
-print(df.info())
-
-# 3. Handle missing values
-print(df.isnull().sum())
-df.dropna(inplace=True)
-
-# 4. Encode ALL categorical columns (IMPORTANT FIX)
-le = LabelEncoder()
-for col in df.columns:
-    if df[col].dtype == 'object':
-        df[col] = le.fit_transform(df[col].astype(str))
-
-# 5. Drop unnecessary column (safe)
-df.drop(columns=['Car ID'], inplace=True, errors='ignore')
-
-# 6. EDA
-
-# Histogram
-if "Price" in df.columns:
-    plt.figure()
-    plt.hist(df["Price"], bins=20)
-    plt.title("Distribution of Car Prices")
-    plt.xlabel("Price")
-    plt.ylabel("Frequency")
-    plt.show()
-
-# Boxplots
-if "Price" in df.columns:
-    plt.figure()
-    sns.boxplot(y=df["Price"])
-    plt.title("Box Plot of Price")
-    plt.show()
-
-if "Mileage" in df.columns:
-    plt.figure()
-    sns.boxplot(y=df["Mileage"])
-    plt.title("Box Plot of Mileage")
-    plt.show()
-
-# Scatter plot
-if "Mileage" in df.columns and "Price" in df.columns:
-    plt.figure()
-    plt.scatter(df["Mileage"], df["Price"])
-    plt.title("Mileage vs Price")
-    plt.xlabel("Mileage")
-    plt.ylabel("Price")
-    plt.show()
-
-# Fuel Type vs Price
-if "Fuel Type" in df.columns and "Price" in df.columns:
-    plt.figure()
-    sns.boxplot(x=df["Fuel Type"], y=df["Price"])
-    plt.title("Fuel Type vs Price")
-    plt.show()
-
-# Correlation Heatmap
-plt.figure(figsize=(10, 8))
-sns.heatmap(df.corr(numeric_only=True), annot=True)
-plt.title("Correlation Matrix")
-plt.show()
-
-# 7. Model Building
-if "Price" in df.columns:
-    X = df.drop("Price", axis=1)
-    y = df["Price"]
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
-
-    model = LinearRegression()
-    model.fit(X_train, y_train)
-
-    # 8. Prediction
-    y_pred = model.predict(X_test)
-
-    # 9. Evaluation
-    print("R2 Score:", r2_score(y_test, y_pred))
-    print("MAE:", mean_absolute_error(y_test, y_pred))
-else:
-    print("Error: 'Price' column not found")
+#_16  Implement a Hopfield network to store and recall binary patterns; 
+demonstrate recall from noisy inputs. 
+import numpy as np 
+import matplotlib.pyplot as plt 
+ 
+# Convert 0/1 to -1/1 
+def to_bipolar(pattern): 
+    return np.where(pattern == 0, -1, 1) 
+ 
+# Hopfield Network class 
+class HopfieldNetwork: 
+    def __init__(self, num_neurons): 
+        self.num_neurons = num_neurons 
+        self.weights = np.zeros((num_neurons, num_neurons)) 
+ 
+    def train(self, patterns): 
+        for p in patterns: 
+            self.weights += np.outer(p, p) 
+        np.fill_diagonal(self.weights, 0) 
+        self.weights /= len(patterns) 
+ 
+    def recall(self, pattern, steps=10): 
+        s = pattern.copy() 
+        for _ in range(steps): 
+            for i in range(self.num_neurons): 
+                net_input = np.dot(self.weights[i], s) 
+                s[i] = 1 if net_input >= 0 else -1 
+        return s 
+ 
+# Define binary patterns (5x5) 
+patterns = [ 
+    np.array([ 
+        1,0,0,0,1, 
+        0,1,0,1,0, 
+        0,0,1,0,0, 
+        0,1,0,1,0, 
+        1,0,0,0,1 
+    ]), 
+    np.array([ 
+        0,1,1,1,0, 
+        1,0,0,0,1, 
+        1,0,0,0,1, 
+        1,0,0,0,1, 
+        0,1,1,1,0 
+    ]) 
+] 
+ 
+# Convert patterns to bipolar 
+patterns = [to_bipolar(p) for p in patterns] 
+ 
+# Create and train network 
+hopfield = HopfieldNetwork(num_neurons=25) 
+hopfield.train(patterns) 
+ 
+# Create noisy version of first pattern 
+noisy_pattern = patterns[0].copy() 
+noise_indices = np.random.choice(25, 6, replace=False) 
+noisy_pattern[noise_indices] *= -1 
+# Recall pattern 
+recalled_pattern = hopfield.recall(noisy_pattern) 
+# Plot patterns 
+def plot_pattern(pattern, title, pos): 
+plt.subplot(1, 3, pos) 
+plt.imshow(pattern.reshape(5,5), cmap='gray') 
+plt.title(title) 
+plt.axis('oA') 
+plt.figure(figsize=(9,3)) 
+plot_pattern(patterns[0], "Original Pattern", 1) 
+plot_pattern(noisy_pattern, "Noisy Input", 2) 
+plot_pattern(recalled_pattern, "Recalled Pattern", 3) 
+plt.show() 
 
 
 
 
 
 
-#_8 credict and application
-import numpy as np
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-credit_record_df = pd.read_csv('credit_record.csv')
-credit_record_df.head(20)
-application_record_df = pd.read_csv('application_record.csv')
-application_record_df.head()
-print(f'Credit data have {credit_record_df.shape[0]} rows , {credit_record_df.shape[1]} columns.')
-print(f'Application data have {application_record_df.shape[0]} rows , {application_record_df.shape[1]} columns.')
-print('Credit data null values:')
-print(credit_record_df.isnull().sum())
-print('Application data null values:')
-print(application_record_df.isnull().sum())
-credit_record_df['STATUS'].unique()
-#Relationship between Columns
-sns.countplot(x='STATUS', data=credit_record_df)
-plt.show()
-plt.figure(figsize=(15, 6))
-sns.countplot(x='MONTHS_BALANCE', data=credit_record_df)
-plt.show()
-credit_record_df.MONTHS_BALANCE.nunique()
-credit_record_df.MONTHS_BALANCE.min()
-credit_record_df.info()
-credit_record_df['MONTHS_BALANCE'].groupby(credit_record_df['STATUS']).agg(pd.Series.mode)
-plt.figure(figsize=(10, 6))
-sns.histplot(credit_record_df['MONTHS_BALANCE'], bins=30, kde=True)
-plt.title('Distribution of MONTHS_BALANCE')
-plt.xlabel('Months Balance')
-plt.ylabel('Frequency')
-plt.show()
-figsize = (10, 6)
-plt.figure(figsize=figsize)
-sns.countplot(x='NAME_INCOME_TYPE', data=application_record_df)
-plt.show()
-credit_record_df['Good or Bad'] = ['Good' if x in set(['0','X','C']) else 'Bad' for x in credit_record_df['STATUS']]
-credit_record_df
-credit_goods_bads = credit_record_df.groupby(['ID','Good or Bad']).size().to_frame('size')
-credit_goods_bads.reset_index(inplace=True)
-credit_goods_bads
-idx = credit_goods_bads.groupby('ID')['size'].idxmax()
-max_goods_bads = credit_goods_bads.loc[idx]
-max_goods_bads
-max_goods_bads['Label'] = [1 if x == 'Good' else 0 for x in max_goods_bads['Good or Bad']]
-max_goods_bads
-max_goods_bads = max_goods_bads.drop(['Good or Bad', 'size'], axis=1)
-max_goods_bads = max_goods_bads.reset_index(drop=True)
-max_goods_bads
-#Time to join data
-application_record_df.fillna('Unknown', inplace=True)
-len(set(application_record_df['ID']).intersection(set(max_goods_bads['ID'])))
-data = pd.merge(application_record_df, max_goods_bads, how='inner', on='ID')
-data
-#Preprocessing
-X = data.drop('Label', axis=1)
-y = data['Label']
-X
-X.info()
-X_info = X.copy()
-
-# Label encoding for categoricals
-for colname in X_info.select_dtypes("object"):
-    X_info[colname], _ = X_info[colname].factorize()
-
-# Converting floats to ints
-for colname in X_info.select_dtypes("float"):
-    X_info[colname] = X_info[colname].astype(int)
-
-# Converting bools to ints
-#for colname in X_info.select_dtypes("bool"):
-#    X_info[colname] = X_info[colname].astype(int)
-
-# All discrete features should now have integer dtypes
-discrete_features = X_info.dtypes != int
-
-from sklearn.feature_selection import mutual_info_regression
-
-def make_mi_scores(X, y, discrete_features):
-    mi_scores = mutual_info_regression(X, y, discrete_features=discrete_features)
-    mi_scores = pd.Series(mi_scores, name="MI Scores", index=X.columns)
-    mi_scores = mi_scores.sort_values(ascending=False)
-    return mi_scores
-
-mi_scores = make_mi_scores(X_info, y, discrete_features)
-mi_scores
-def plot_mi_scores(scores):
-    scores = scores.sort_values(ascending=True)
-    width = np.arange(len(scores))
-    ticks = list(scores.index)
-    plt.barh(width, scores)
-    plt.yticks(width, ticks)
-    plt.title("Mutual Information Scores")
-
-
-plt.figure(dpi=100, figsize=(10, 15))
-plot_mi_scores(mi_scores)
-sns.relplot(x="AMT_INCOME_TOTAL", y="Label", data=data);
-sns.lmplot(x="DAYS_EMPLOYED", y="Label", hue="CNT_CHILDREN", data=data);
-#sns.lmplot(x="CODE_GENDER", y=y, hue="FLAG_OWN_REALTY", data=X_info);
-plt.figure(dpi=50, figsize=(35, 10))
-sns.scatterplot(x=data['OCCUPATION_TYPE'], y=data['Label'], hue=data['CODE_GENDER'])
-#Convert Categorical Data To numerical
-X = pd.get_dummies(X, drop_first=True)
-X
-#Scalling the data
-from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-from sklearn.preprocessing import StandardScaler
-
-
-scaler = StandardScaler()
-
-X_train_scaled= scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
-print("Normalized input data(X):\n", X_train_scaled)
-#modelling
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay
-from sklearn.ensemble import RandomForestClassifier
-from xgboost import XGBClassifier
-import matplotlib.pyplot as plt
-rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
-
-rf_model.fit(X_train, y_train)
-
-rf_pred = rf_model.predict(X_test)
-rf_cm = confusion_matrix(y_test, rf_pred)
-
-print("Random Forest Confusion Matrix")
-print(rf_cm)
-
-ConfusionMatrixDisplay(confusion_matrix=rf_cm).plot()
-plt.title("Random Forest Confusion Matrix")
-plt.show()
-xgb_model = XGBClassifier(use_label_encoder=False, eval_metric='logloss')
-
-xgb_model.fit(X_train, y_train)
-
-xgb_pred = xgb_model.predict(X_test)
-xgb_cm = confusion_matrix(y_test, xgb_pred)
-
-print("XGBoost Confusion Matrix")
-print(xgb_cm)
-
-ConfusionMatrixDisplay(confusion_matrix=xgb_cm).plot()
-plt.title("XGBoost Confusion Matrix")
-plt.show()
+#_17 . Implement BAM to associate input patterns A to output patterns B 
+import numpy as np 
+# ----------------------------- 
+# Step 1: Define input patterns (Letters) 
+# Using bipolar values: 1 and -1 
+# ----------------------------- 
+A = np.array([ 
+[ 1, -1,  1, -1],   # Pattern A1 (Letter A) 
+[-1,  1, -1,  1],   # Pattern A2 (Letter B) 
+[ 1,  1, -1, -1]    # Pattern A3 (Letter C) 
+]) 
+# ----------------------------- 
+# Step 2: Define output patterns (Digits) 
+# ----------------------------- 
+B = np.array([ 
+[ 1, -1, -1],   # Digit 1 
+[-1,  1, -1],   # Digit 2 
+[-1, -1,  1]    # Digit 3 
+]) 
+# ----------------------------- 
+# Step 3: Train BAM (Weight matrix) 
+# W = sum of outer products 
+# ----------------------------- 
+W = np.zeros((A.shape[1], B.shape[1])) 
+for i in range(len(A)): 
+W += np.outer(A[i], B[i]) 
+print("Weight Matrix W:\n", W) 
+# ----------------------------- 
+# Step 4: Recall with noisy input 
+# ----------------------------- 
+# Noisy version of A1 
+A_noisy = np.array([1, -1, -1, -1]) 
+# Forward recall (A → B) 
+B_recalled = np.sign(A_noisy @ W) 
+# Handle zero values 
+B_recalled[B_recalled == 0] = 1 
+print("\nNoisy Input A:", A_noisy) 
+print("Recalled Output B:", B_recalled) 
+# ----------------------------- 
+# Step 5: Backward recall (B → A) 
+# ----------------------------- 
+A_recalled = np.sign(B_recalled @ W.T) 
+A_recalled[A_recalled == 0] = 1 
+print("Recalled Input A:", A_recalled)
