@@ -1,0 +1,147 @@
+# Practical_1
+import cv2 as cv
+import matplotlib.pyplot as plt
+import cv2 
+img = cv2.imread("11.jpg") 
+plt.imshow(img)
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
+plt.imshow(gray)
+
+
+
+#Practical_2
+from PIL import Image 
+import matplotlib.pyplot as plt 
+# Load images
+background = Image.open("11.jpg").convert("RGBA") 
+overlay = Image.open("12.jpg").convert("RGBA") 
+# Resize overlay
+overlay = overlay.resize((150, 150))  
+# Position
+x, y = 50, 50  
+# Copy background and paste overlay with transparency
+result = background.copy()
+result.paste(overlay, (x, y), overlay)  # <-- Added overlay as mask
+# Show result
+plt.figure(figsize=(8, 8)) 
+plt.imshow(result) 
+plt.axis("off") 
+plt.show()
+# Save result
+result.save("output.png")  # Save as PNG to preserve transparency
+
+
+
+
+#Practical_3
+# Practical 3
+from PIL import Image 
+import matplotlib.pyplot 
+img = Image.open( "11.jpg" ).convert("RGBA")
+alpha_value = 100
+img.putalpha(alpha_value)
+img.save("transparent_img.png") 
+plt.imshow(img) 
+plt.axis( "off") 
+plt.show()
+
+
+#Practical_4
+import cv2 
+import matplotlib.pyplot as plt 
+img = cv2.imread("11.jpg", 0) 
+plt.figure(figsize=(12,5)) 
+plt.subplot(2,2,1) 
+plt.imshow(img, cmap='gray')
+plt.title("Original Image") 
+plt.axis('off') 
+plt.subplot(2,2,2) 
+plt.hist(img.ravel(), 256, [0,256]) 
+plt.title("Histogram of Original Image") 
+plt.xlabel("Pixel Intensity") 
+plt.ylabel("Frequency")
+equalized_img = cv2.equalizeHist(img) 
+plt.subplot(2,2,3) 
+plt.imshow(equalized_img, cmap='gray') 
+plt.title("Equalized Image") 
+plt.axis('off') 
+plt.subplot(2,2,4) 
+plt.hist(equalized_img.ravel(), 256, [0,256]) 
+plt.title("Histogram After Equalization")
+plt.xlabel("Pixel Intensity") 
+plt.ylabel("Frequency") 
+plt.tight_layout()
+plt.show()
+cv2.imwrite("equalized_image.jpg", equalized_img)
+
+
+
+
+# practical 5
+from PIL import Image 
+img = Image.open("11.jpg") 
+img = img.convert("RGB")
+img.save("output.jpg", "JPEG") 
+print("Image converted to JPG successfully!")
+
+
+
+
+
+# praactical 6
+import cv2 
+import matplotlib.pyplot as plt 
+img = cv2.imread("11.jpg") 
+img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) 
+avg_filter = cv2.blur(img, (5, 5)) 
+gaussian_filter = cv2.GaussianBlur(img, (5, 5), 0) 
+median_filter = cv2.medianBlur(img, 5) 
+bilateral_filter = cv2.bilateralFilter(img, 9, 75, 75) 
+plt.figure(figsize=(12, 8)) 
+plt.subplot(2, 3, 1) 
+plt.imshow(img) 
+plt.title("Original Image") 
+plt.axis("off") 
+plt.subplot(2, 3, 2) 
+plt.imshow(avg_filter) 
+plt.title("Averaging Filter") 
+plt.axis("off") 
+plt.subplot(2, 3, 3) 
+plt.imshow(gaussian_filter) 
+plt.title("Gaussian Filter") 
+plt.axis("off") 
+plt.subplot(2, 3, 4)
+plt.imshow(median_filter) 
+plt.title("Median Filter") 
+plt.axis("off") 
+plt.subplot(2, 3, 5) 
+plt.imshow(bilateral_filter) 
+plt.title("Bilateral Filter") 
+plt.axis("off") 
+plt.tight_layout() 
+plt.show() 
+cv2.imwrite("average_filter.jpg", cv2.cvtColor(avg_filter, cv2.COLOR_RGB2BGR)) 
+cv2.imwrite("gaussian_filter.jpg", cv2.cvtColor(gaussian_filter, cv2.COLOR_RGB2BGR)) 
+cv2.imwrite("median_filter.jpg", cv2.cvtColor(median_filter, cv2.COLOR_RGB2BGR)) 
+cv2.imwrite("bilateral_filter.jpg", cv2.cvtColor(bilateral_filter, cv2.COLOR_RGB2BGR))
+
+
+
+
+# Practical 7
+import cv2 
+import matplotlib.pyplot as plt
+img = cv2.imread("11.jpg") 
+img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) 
+blurred_img = cv2.blur(img_rgb, (15, 15)) 
+plt.figure(figsize=(10, 5)) 
+plt.subplot(1, 2, 1) 
+plt.imshow(img_rgb) 
+plt.title("Original Image") 
+plt.axis("off") 
+plt.subplot(1, 2, 2) 
+plt.imshow(blurred_img) 
+plt.title("Blurred Image") 
+plt.axis("off") 
+plt.show()
+cv2.imwrite("blurred_image.jpg", cv2.cvtColor(blurred_img, cv2.COLOR_RGB2BGR))
