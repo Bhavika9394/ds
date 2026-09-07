@@ -1,147 +1,241 @@
-# Practical_1
-import cv2 as cv
-import matplotlib.pyplot as plt
-import cv2 
-img = cv2.imread("11.jpg") 
-plt.imshow(img)
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
-plt.imshow(gray)
+Install Node.js
+→https://nodeis.org
+2. Install Expo CLI:
+3. npm install -g expo-cli
+4. Create project:
+5. npx create-expo-app MyApp
+6. cd MyApp
+7. npm start
+8. Run on phone using Expo Go
 
 
 
-#Practical_2
-from PIL import Image 
-import matplotlib.pyplot as plt 
-# Load images
-background = Image.open("11.jpg").convert("RGBA") 
-overlay = Image.open("12.jpg").convert("RGBA") 
-# Resize overlay
-overlay = overlay.resize((150, 150))  
-# Position
-x, y = 50, 50  
-# Copy background and paste overlay with transparency
-result = background.copy()
-result.paste(overlay, (x, y), overlay)  # <-- Added overlay as mask
-# Show result
-plt.figure(figsize=(8, 8)) 
-plt.imshow(result) 
-plt.axis("off") 
-plt.show()
-# Save result
-result.save("output.png")  # Save as PNG to preserve transparency
+....1 basic react native app
+
+import React from 'react';
+import{View, Text, Image, Button } from 'react-native';
+export default function App(){
+return(
+<View>
+  <Text>Hello React Native</Text>
+  <Image
+    source={{ uri: 'https://reactnative.dev/img/tiny_logo.png' }}
+    style={{ width: 100, height: 100 }}
+  />
+  <Button title="Click Me" onPress={() => alert('Pressed')} />
+</View>
+);
+}
 
 
 
+....2 ui design using core components
 
-#Practical_3
-# Practical 3
-from PIL import Image 
-import matplotlib.pyplot 
-img = Image.open( "11.jpg" ).convert("RGBA")
-alpha_value = 100
-img.putalpha(alpha_value)
-img.save("transparent_img.png") 
-plt.imshow(img) 
-plt.axis( "off") 
-plt.show()
+import { View, Text, ScrollView } from 'react-native';
 
-
-#Practical_4
-import cv2 
-import matplotlib.pyplot as plt 
-img = cv2.imread("11.jpg", 0) 
-plt.figure(figsize=(12,5)) 
-plt.subplot(2,2,1) 
-plt.imshow(img, cmap='gray')
-plt.title("Original Image") 
-plt.axis('off') 
-plt.subplot(2,2,2) 
-plt.hist(img.ravel(), 256, [0,256]) 
-plt.title("Histogram of Original Image") 
-plt.xlabel("Pixel Intensity") 
-plt.ylabel("Frequency")
-equalized_img = cv2.equalizeHist(img) 
-plt.subplot(2,2,3) 
-plt.imshow(equalized_img, cmap='gray') 
-plt.title("Equalized Image") 
-plt.axis('off') 
-plt.subplot(2,2,4) 
-plt.hist(equalized_img.ravel(), 256, [0,256]) 
-plt.title("Histogram After Equalization")
-plt.xlabel("Pixel Intensity") 
-plt.ylabel("Frequency") 
-plt.tight_layout()
-plt.show()
-cv2.imwrite("equalized_image.jpg", equalized_img)
+export default function App() {
+  return (
+    <ScrollView>
+      <View>
+        <Text>Item 1</Text>
+        <Text>Item 2</Text>
+      </View>
+    </ScrollView>
+  );
+}
 
 
 
 
-# practical 5
-from PIL import Image 
-img = Image.open("11.jpg") 
-img = img.convert("RGB")
-img.save("output.jpg", "JPEG") 
-print("Image converted to JPG successfully!")
+...3 styling using stylesheet and flexbox
+import { StyleSheet, View, Text } from 'react-native';
+
+export default function App() {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.text}>Styled Text</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  text: {
+    fontSize: 20,
+    color: 'blue',
+  },
+});
+
+
+4..... user input form creation
+import React, { useState } from 'react';
+import { View, TextInput, Button } from 'react-native';
+
+export default function App() {
+  const [name, setName] = useState('');
+
+  return (
+    <View>
+      <TextInput
+        placeholder="Enter Name"
+        value={name}
+        onChangeText={setName}
+      />
+      <Button title="Submit" onPress={() => alert(name)} />
+    </View>
+  );
+}
 
 
 
+....5 Props and state in functional components
+import { Text, View } from 'react-native';
+
+const Child = ({ message }) => {
+  return (
+    <View style={{ flex: 1, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center' }}>
+      <Text style={{ color: 'black', fontSize: 20 }}>{message}</Text>
+    </View>
+  );
+};
+
+export default function App() {
+  return <Child message="Hello from Parent" />;
+}
 
 
-# praactical 6
-import cv2 
-import matplotlib.pyplot as plt 
-img = cv2.imread("11.jpg") 
-img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) 
-avg_filter = cv2.blur(img, (5, 5)) 
-gaussian_filter = cv2.GaussianBlur(img, (5, 5), 0) 
-median_filter = cv2.medianBlur(img, 5) 
-bilateral_filter = cv2.bilateralFilter(img, 9, 75, 75) 
-plt.figure(figsize=(12, 8)) 
-plt.subplot(2, 3, 1) 
-plt.imshow(img) 
-plt.title("Original Image") 
-plt.axis("off") 
-plt.subplot(2, 3, 2) 
-plt.imshow(avg_filter) 
-plt.title("Averaging Filter") 
-plt.axis("off") 
-plt.subplot(2, 3, 3) 
-plt.imshow(gaussian_filter) 
-plt.title("Gaussian Filter") 
-plt.axis("off") 
-plt.subplot(2, 3, 4)
-plt.imshow(median_filter) 
-plt.title("Median Filter") 
-plt.axis("off") 
-plt.subplot(2, 3, 5) 
-plt.imshow(bilateral_filter) 
-plt.title("Bilateral Filter") 
-plt.axis("off") 
-plt.tight_layout() 
-plt.show() 
-cv2.imwrite("average_filter.jpg", cv2.cvtColor(avg_filter, cv2.COLOR_RGB2BGR)) 
-cv2.imwrite("gaussian_filter.jpg", cv2.cvtColor(gaussian_filter, cv2.COLOR_RGB2BGR)) 
-cv2.imwrite("median_filter.jpg", cv2.cvtColor(median_filter, cv2.COLOR_RGB2BGR)) 
-cv2.imwrite("bilateral_filter.jpg", cv2.cvtColor(bilateral_filter, cv2.COLOR_RGB2BGR))
+....6 Counter app using state
+import React, { useState } from 'react';
+import { View, Text, Button } from 'react-native';
+
+export default function App() {
+  const [count, setCount] = useState(0);
+  return (
+    <View>
+      <Text style={{ color: 'white', fontSize: 24 }}>{count}</Text>
+      <Button title="Increase" onPress={() => setCount(count + 1)} />
+    </View>
+  );
+}
+
+....7 Stack navigation implementation
+import React, { useState } from 'react';
+import { View, Text, Button } from 'react-native';
+
+function Home({ onNavigate }) {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text style={{ fontSize: 20, marginBottom: 20, color: 'white' }}>Home Screen</Text>
+      <Button title="Go" onPress={() => onNavigate('Details')} />
+    </View>
+  );
+}
+
+function Details({ onNavigate }) {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text style={{ fontSize: 20, marginBottom: 20, color: 'white' }}>Details Screen</Text>
+      <Button title="Back" onPress={() => onNavigate('Home')} />
+    </View>
+  );
+}
+
+export default function App() {
+  const [screen, setScreen] = useState('Home');
+
+  return screen === 'Home' ? (
+    <Home onNavigate={setScreen} />
+  ) : (
+    <Details onNavigate={setScreen} />
+  );
+}
+
+
+.....8 Tab navigation
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+
+const TABS = [
+  { name: 'Home', icon: '🏠', desc: 'Welcome to the home section' },
+  { name: 'Profile', icon: '👤', desc: 'Your profile details go here' },
+  { name: 'Settings', icon: '⚙️', desc: 'App settings go here' },
+];
+
+export default function App() {
+  const [active, setActive] = useState(0);
+  const tab = TABS[active];
+
+  return (
+    <View style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <Text style={styles.icon}>{tab.icon}</Text>
+        <Text style={styles.heading}>{tab.name} Screen</Text>
+        <Text style={styles.description}>{tab.desc}</Text>
+      </View>
+
+      <View style={styles.tabBar}>
+        {TABS.map((t, i) => (
+          <TouchableOpacity key={t.name} onPress={() => setActive(i)}>
+            <Text style={{ color: i === active ? '#007AFF' : '#888', fontSize: 13 }}>
+              {t.name}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f5fafe' },
+  icon: { fontSize: 55, marginBottom: 15 },
+  heading: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
+  description: { fontSize: 16, textAlign: 'center', paddingHorizontal: 25 },
+  tabBar: { flexDirection: 'row', height: 65, justifyContent: 'space-around', alignItems: 'center', borderTopWidth: 1, borderTopColor: '#ddd', backgroundColor: '#fff' },
+});
 
 
 
+....9 passing data
+import React, { useState } from 'react';
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 
-# Practical 7
-import cv2 
-import matplotlib.pyplot as plt
-img = cv2.imread("11.jpg") 
-img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) 
-blurred_img = cv2.blur(img_rgb, (15, 15)) 
-plt.figure(figsize=(10, 5)) 
-plt.subplot(1, 2, 1) 
-plt.imshow(img_rgb) 
-plt.title("Original Image") 
-plt.axis("off") 
-plt.subplot(1, 2, 2) 
-plt.imshow(blurred_img) 
-plt.title("Blurred Image") 
-plt.axis("off") 
-plt.show()
-cv2.imwrite("blurred_image.jpg", cv2.cvtColor(blurred_img, cv2.COLOR_RGB2BGR))
+export default function App() {
+  const [name, setName] = useState('');
+  const [course, setCourse] = useState('');
+  const [showDetails, setShowDetails] = useState(false);
+
+  if (showDetails) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.card}>
+          <Text style={styles.label}>Student Name</Text>
+          <Text style={styles.value}>{name || 'Not Provided'}</Text>
+          <Text style={styles.label}>Course Name</Text>
+          <Text style={styles.value}>{course || 'Not Provided'}</Text>
+        </View>
+        <Button title="Back" onPress={() => setShowDetails(false)} />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <TextInput style={styles.input} placeholder="Enter student name" value={name} onChangeText={setName} />
+      <TextInput style={styles.input} placeholder="Enter course name" value={course} onChangeText={setCourse} />
+      <Button title="Open Details" onPress={() => setShowDetails(true)} />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 25, justifyContent: 'center' },
+  input: { height: 50, paddingHorizontal: 14, marginBottom: 16, backgroundColor: '#fff', borderRadius: 12, elevation: 3 },
+  card: { backgroundColor: '#fff', borderRadius: 12, padding: 20, elevation: 3, marginBottom: 16 },
+  label: { fontSize: 15, fontWeight: 'bold', marginBottom: 5 },
+  value: { fontSize: 18, marginBottom: 20 },
+});
