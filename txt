@@ -2,6 +2,247 @@ composer --version
 composer global require laravel/installer
 laravel --version
 cd C:\xampp\htdocs
-composer create-projrct laravel/laravel myapp
+composer create-project laravel/laravel myapp
 cd myapp
 php artisan serve
+
+
+#Basic laravel authenticator
+.env file 
+change database name 
+
+composer require laravel/breeze --dev 
+php artisan breeze:install blade 
+npm install && npm run dev
+
+php artisan migrate
+php artisan serve
+
+
+#web app using laravel
+php artisan make:model Task -mcr
+
+Migration schema in database/migrations/..._create_tasks_table.php: 
+Schema::create('tasks', function (Blueprint $table) { 
+    $table->id(); 
+    $table->foreignId('user_id')->constrained()->onDelete('cascade'); 
+    $table->string('title'); 
+    $table->text('description')->nullable(); 
+    $table->enum('priority', ['low', 'medium', 'high'])->default('medium'); 
+    $table->boolean('completed')->default(false); 
+     $table->timestamps(); 
+}); 
+
+// Task.php 
+protected $fillable = ['title', 'description', 'priority', 'completed']; 
+  
+// User.php - add relationship
+public function tasks() { 
+return $this->hasMany(Task::class); 
+}
+
+routes/web.php
+Route::middleware('auth')->group(function () { 
+Route::resource('tasks', TaskController::class); 
+});
+
+php artisan migrate 
+php artisan serve 
+
+
+
+# crud 
+php artisan make:model Post -mcr
+
+Open app/Models/Post.php: 
+<?php 
+namespace App\Models; 
+use Illuminate\Database\Eloquent\Model; 
+class Post extends Model 
+{ 
+protected $fillable = ['title', 'content', 'status']; 
+}
+
+In routes/web.php: 
+use App\Http\Controllers\PostController; 
+Route::resource('posts', PostController::class);
+
+Open app/Http/Controllers/PostController.php: 
+public function index() {
+ $posts = Post::latest()->get(); 
+    return view('posts.index', compact('posts')); 
+} 
+  
+// CREATE - Show form 
+public function create() { 
+    return view('posts.create'); 
+} 
+  
+// STORE - Save to DB 
+public function store(Request $request) { 
+    Post::create($request->validate([ 
+        'title'   => 'required|max:255', 
+        'content' => 'required', 
+    ])); 
+    return redirect()->route('posts.index')->with('success', 'Post created!'); 
+} 
+  
+// EDIT - Show edit form 
+public function edit(Post $post) { 
+    return view('posts.edit', compact('post')); 
+} 
+  
+// UPDATE - Save changes 
+public function update(Request $request, Post $post) { 
+    $post->update($request->validate([ 
+        'title'   => 'required|max:255', 
+        'content' => 'required', 
+    ])); 
+    return redirect()->route('posts.index')->with('success', 'Post updated!'); 
+} 
+  
+// DESTROY - Delete 
+public function destroy(Post $post) { 
+    $post->delete(); 
+    return redirect()->route('posts.index')->with('success', 'Post deleted!'); 
+}
+
+Create the folder resources/views/posts/ and the following files: 
+• index.blade.php — List all posts with Edit and Delete buttons 
+• create.blade.php — Form to create a new post 
+• edit.blade.php — Pre-filled form to edit a post 
+ 
+Sample create.blade.php: 
+@extends('layouts.app') 
+@section('content') 
+<h2>Create Post</h2> 
+<form method="POST" action="{{ route('posts.store') }}"> 
+@csrf 
+<input type="text" name="title" placeholder="Title" required><br> 
+<textarea name="content" placeholder="Content" required></textarea><br> 
+<button type="submit">Save Post</button> 
+</form> 
+@endsection 
+
+
+#Create Migrations
+php artisan make:migration create_posts_table 
+database/migrations/
+public function up(): void 
+{ 
+    Schema::create('posts', function (Blueprint $table) { 
+        $table->id(); 
+        $table->foreignId('user_id')->constrained()->onDelete('cascade'); 
+        $table->string('title'); 
+        $table->text('content'); 
+        $table->string('status')->default('draft'); 
+        $table->timestamps(); 
+    }); 
+} 
+public function down(): void 
+{ 
+Schema::dropIfExists('posts'); 
+}
+php artisan migrate 
+
+# Pass Data from Routes to Views
+routes/web.php
+Route::get('/profile', function () { 
+    return view('profile') 
+        ->with('name', 'John Doe') 
+        ->with('age', 22); 
+}); 
+ resources/views/profile.blade.php
+@extends('layouts.app') 
+@section('title', 'Profile') 
+@section('content') 
+<h2>Student Profile</h2> 
+<p><strong>Name:</strong> {{ $name }}</p> 
+<p><strong>Age:</strong> {{ $age }}</p> 
+<h3>Skills:</h3> 
+<ul> 
+@foreach($skills as $skill) 
+<li>{{ $skill }}</li> 
+@endforeach 
+</ul> 
+@endsection
+ Run php artisan serve
+
+
+
+#Create Corresponding View Files for Each Route
+resources/views/layouts/app.blade.php: 
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <title>@yield('title', 'My App')</title> 
+    <style> 
+        body { font-family: Arial; margin: 40px; background: #f5f5f5; } 
+        nav a { margin-right: 15px; text-decoration: none; color: #1F4E79; } 
+    </style> 
+</head> 
+<body> 
+    <nav> 
+        <a href="{{ route('home') }}">Home</a> 
+        <a href="{{ route('about') }}">About</a> 
+        <a href="{{ route('contact') }}">Contact</a> 
+    </nav> 
+    <hr> 
+    <div class="content"> 
+        @yield('content') 
+    </div> 
+</body> 
+</html> 
+resources/views/home.blade.php: 
+@extends('layouts.app') 
+@section('title', 'Home') 
+@section('content') 
+<h1>Welcome to Home Page</h1> 
+<p>This is the home page of our Laravel application.</p> 
+@endsection 
+resources/views/about.blade.php:
+@extends('layouts.app') 
+@section('title', 'About Us') 
+@section('content') 
+<h1>About Us</h1> 
+<p>We are a team of passionate web developers.</p> 
+@endsection 
+resources/views/contact.blade.php: 
+@extends('layouts.app') 
+@section('title', 'Contact') 
+@section('content') 
+<h1>Contact Us</h1> 
+<p>Email us at: contact@example.com</p> 
+@endsection
+ Run php artisan serve
+
+
+#Create Routes
+routes/web.php
+use Illuminate\Support\Facades\Route; 
+Route::get('/', function () { 
+return view('home'); 
+})->name('home'); 
+Route::get('/about', function () { 
+return view('about'); 
+})->name('about'); 
+Route::get('/contact', function () { 
+return view('contact'); 
+})->name('contact'); 
+resources/views/home.blade.php 
+<!DOCTYPE html> 
+<html> 
+<head><title>Home</title></head> 
+<body> 
+<h1>Welcome to the Home Page</h1> 
+<nav> 
+<a href="{{ route('home') }}">Home</a> | 
+<a href="{{ route('about') }}">About</a> | 
+<a href="{{ route('contact') }}">Contact</a> 
+</nav> 
+</body> 
+</html> 
+same for about and contact
+php artisan serve 
+php artisan route:list 
