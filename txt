@@ -1,180 +1,138 @@
-#image processing tool
-import matplotlib.pyplot as plt
-import cv2 
-img = cv2.imread( "download.png") 
-plt.imshow(img)
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
-plt.imshow(gray)
+in jupyter
+!pip install selenium
+import selenium 
+print(selenium.__version__)
+in notepad
+python -m pip --version
+python -m pip install selenium
+python -c "import selenium; print(selenium.**version**)"
+cd Desktop\Selenium_Practicals
+python test_selenium.py
+
+#wrbdriver script
+from selenium import webdriver
+driver = webdriver.Chrome()
+driver.get("https://www.google.com")
+print("Page Title:", driver.title)
+driver.quit()
 
 
-#overrlay image
-from PIL import Image 
-import matplotlib.pyplot as plt 
-background = Image.open("download.png").convert("RGBA") 
-overlay = Image.open("img.png").convert("RGBA")
-overlay = overlay.resize((150, 150)) 
-x = 50 
-y = 50 
-result = background.copy() 
-result.paste(overlay, (x, y)) 
-plt.figure(figsize=(8, 8))
-plt.imshow(result) 
-plt.axis("off") 
-plt.show() 
-result.save("output.png")
-
-
-#tranparent png imag
-from PIL import Image 
-import matplotlib.pyplot as plt
-img = Image.open( "download.png" ).convert("RGBA")
-alpha_value = 100 
-img.putalpha(alpha_value)
-img.save("transparent_img.png") 
-plt.imshow(img) 
-plt.axis( "off") 
-plt.show()
-
-
-
-#histogram equalization
-import cv2 
-import matplotlib.pyplot as plt 
-img = cv2.imread("download.png", 0) 
-plt.figure(figsize=(12,5)) 
-plt.subplot(2,2,1) 
-plt.imshow(img, cmap='gray') 
-plt.title("Original Image") 
-plt.axis('off') 
-plt.subplot(2,2,2)
-plt.hist(img.ravel(), 256, [0,256]) 
-plt.title("Histogram of Original Image") 
-plt.xlabel("Pixel Intensity") 
-plt.ylabel("Frequency") 
-equalized_img = cv2.equalizeHist(img)
-plt.subplot(2,2,3) 
-plt.imshow(equalized_img, cmap='gray') 
-plt.title("Equalized Image")
-plt.axis('off') 
-plt.subplot(2,2,4) 
-plt.hist(equalized_img.ravel(), 256, [0,256]) 
-plt.title("Histogram After Equalization")
-plt.xlabel("Pixel Intensity") 
-plt.ylabel("Frequency") 
-plt.tight_layout() 
-plt.show()
-cv2.imwrite("equalized_image.jpg", equalized_img)
+#form handling
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import time
+driver = webdriver.Chrome()
+driver.get("https://the-internet.herokuapp.com/login")
+time.sleep(5)
+username = driver.find_element(By.ID, "username")
+username.send_keys("tomsmith")
+time.sleep(3)
+password = driver.find_element(By.ID, "password")
+password.send_keys("SuperSecretPassword!")
+time.sleep(3)
+login_button = driver.find_element(
+    By.CSS_SELECTOR, "button[type='submit']"
+)
+time.sleep(2)
+login_button.click()
+time.sleep(5)
+print("Page Title:", driver.title)
+print("Current URL:", driver.current_url)
+message = driver.find_element(By.ID, "flash").text
+print("Login Message:", message)
+time.sleep(5)
 
 
 
-#jpg pillow
-from PIL import Image 
-img = Image.open("download.png") 
-img = img.convert("RGB")
-img.save("output.jpg", "JPEG") 
-print("Image converted to JPG successfully!")
-
-
-#smoothing spatial filters
-import cv2 
-import matplotlib.pyplot as plt
-img = cv2.imread("download.png") 
-img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-avg_filter = cv2.blur(img, (5, 5))
-gaussian_filter = cv2.GaussianBlur(img, (5, 5), 0) 
-median_filter = cv2.medianBlur(img, 5) 
-bilateral_filter = cv2.bilateralFilter(img, 9, 75, 75)
-plt.figure(figsize=(12, 8)) 
-plt.subplot(2, 3, 1) 
-plt.imshow(img) 
-plt.title("Original Image")
-plt.axis("off") 
-plt.subplot(2, 3, 2) 
-plt.imshow(avg_filter) 
-plt.title("Averaging Filter")
-plt.axis("off") 
-plt.subplot(2, 3, 3) 
-plt.imshow(gaussian_filter) 
-plt.title("Gaussian Filter") 
-plt.axis("off")
-plt.subplot(2, 3, 4)
-plt.imshow(median_filter) 
-plt.title("Median Filter") 
-plt.axis("off") 
-plt.subplot(2, 3, 5)
-plt.imshow(bilateral_filter) 
-plt.title("Bilateral Filter") 
-plt.axis("off") 
-plt.tight_layout() 
-plt.show()
-cv2.imwrite("average_filter.jpg", cv2.cvtColor(avg_filter, cv2.COLOR_RGB2BGR)) 
-cv2.imwrite("gaussian_filter.jpg", cv2.cvtColor(gaussian_filter, cv2.COLOR_RGB2BGR)) 
-cv2.imwrite("median_filter.jpg", cv2.cvtColor(median_filter, cv2.COLOR_RGB2BGR)) 
-cv2.imwrite("bilateral_filter.jpg", cv2.cvtColor(bilateral_filter, cv2.COLOR_RGB2BGR))
-
-
-#image operation blur
-import cv2 
-import matplotlib.pyplot as plt
-img = cv2.imread("download.png") 
-img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-blurred_img = cv2.blur(img_rgb, (15, 15))
-plt.figure(figsize=(10, 5)) 
-plt.subplot(1, 2, 1) 
-plt.imshow(img_rgb)
-plt.title("Original Image") 
-plt.axis("off") 
-plt.subplot(1, 2, 2) 
-plt.imshow(blurred_img) 
-plt.title("Blurred Image") 
-plt.axis("off") 
-plt.show() 
-cv2.imwrite("blurred_image.jpg", cv2.cvtColor(blurred_img, cv2.COLOR_RGB2BGR))
+#locators
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import time
+driver = webdriver.Chrome()
+driver.get("https://the-internet.herokuapp.com/javascript_alerts")
+time.sleep(3)
+driver.find_element(
+    By.XPATH,
+    "//button[text()='Click for JS Alert']"
+).click()
+time.sleep(2)
+alert = driver.switch_to.alert
+print("Alert Text:", alert.text)
+alert.accept()
+time.sleep(5)
+driver.quit()
+driver.quit()
 
 
 
-#image metadata
-import cv2  
-image = cv2.imread("download.png")
-height, width, channels = image.shape 
-print("Image Metadata") 
-print("----------------") 
-print("Width       :", width, "pixels")
-print("Height      :", height, "pixels") 
-print("Channels    :", channels) 
-print("Data Type   :", image.dtype) 
-print("Image Size  :", image.size, "pixels") 
-print("Shape       :", image.shape)
+#alerts 
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import time
+driver = webdriver.Chrome()
+driver.get("https://the-internet.herokuapp.com/javascript_alerts")
+time.sleep(3)
+driver.find_element(
+    By.XPATH,
+    "//button[text()='Click for JS Alert']"
+).click()
+time.sleep(2)
+alert = driver.switch_to.alert
+print("Alert Text:", alert.text)
+alert.accept()
+time.sleep(5)
+driver.quit()
 
 
-# edge detection 
-from PIL import Image 
-import cv2 
-import numpy as np 
-import matplotlib.pyplot as plt 
-img = Image.open("download.png") 
-img_np = np.array(img)
-if len(img_np.shape) == 2:
-  gray = img_np 
-elif img_np.shape[2] == 4:
-  gray = cv2.cvtColor(img_np, cv2.COLOR_RGBA2GRAY)
-else:   
-  gray = cv2.cvtColor(img_np, cv2.COLOR_RGB2GRAY) 
-edges = cv2.Canny(gray, 100, 200)
-plt.figure(figsize=(12, 6))
-plt.subplot(1, 2, 1) 
-if len(img_np.shape) == 2:    
-  plt.imshow(img_np, cmap='gray') 
-else:    
-  plt.imshow(img_np) 
-plt.title("Original Image") 
-plt.axis("off") 
-plt.subplot(1, 2, 2) 
-plt.imshow(edges, cmap='gray') 
-plt.title("Edge Detected Image") 
-plt.axis("off") 
-plt.tight_layout() 
-plt.show()
-cv2.imwrite("edge_detected.jpg", edges) 
-print("Edge detection completed successfully!") 
-print("Output saved as 'edge_detected.jpg'")
+#frames
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import time
+driver = webdriver.Chrome()
+driver.get("https://the-internet.herokuapp.com/iframe")
+time.sleep(3)
+driver.switch_to.frame("mce_0_ifr")
+time.sleep(2)
+body = driver.find_element(By.TAG_NAME, "body")
+body.clear()
+body.send_keys("Hello Selenium")
+time.sleep(10)
+driver.switch_to.default_content()
+time.sleep(3)
+driver.quit()
+
+
+#multiple windows
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import time
+driver = webdriver.Chrome()
+driver.get("https://the-internet.herokuapp.com/windows")
+time.sleep(3)
+driver.find_element(
+By.LINK_TEXT, "Click Here"
+).click()
+time.sleep(3)
+windows = driver.window_handles
+print("Number of Windows:", len(windows))
+driver.switch_to.window(windows[1])
+time.sleep(5)
+print("New Window Title:", driver.title)
+print("New Window URL:", driver.current_url)
+time.sleep(3)
+driver.quit()
+
+
+
+#google search
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+driver = webdriver.Chrome()
+driver.get("https://www.google.com")
+search_box = driver.find_element(By.NAME, "q")
+search_box.send_keys("Selenium WebDriver")
+search_box.send_keys(Keys.ENTER)
+print("Page Title:", driver.title)
+print("Current URL:", driver.current_url)
+driver.quit()
